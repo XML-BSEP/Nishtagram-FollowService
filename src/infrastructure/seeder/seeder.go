@@ -11,13 +11,15 @@ import (
 
 func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context){
 
+	dropDatabase(db,mongoCli, ctx)
+
 	if cnt,_ := mongoCli.Database(db).Collection("profiles").EstimatedDocumentCount(*ctx, nil); cnt == 0{
 		profileCollection := mongoCli.Database(db).Collection("profiles")
 		seedProfiles(profileCollection, ctx)
 	}
 
 	if cnt,_ := mongoCli.Database(db).Collection("profile_following").EstimatedDocumentCount(*ctx, nil); cnt == 0{
-		followingCollection := mongoCli.Database(db).Collection("profile_following")
+		followingCollection := mongoCli.Database(db).Collection("profile_followings")
 		seedProfileFollowing(followingCollection, ctx)
 	}
 
@@ -27,12 +29,17 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context){
 	}
 
 	if cnt,_ := mongoCli.Database(db).Collection("follow_request").EstimatedDocumentCount(*ctx, nil); cnt == 0{
-		followRequestCollection := mongoCli.Database(db).Collection("follow_request")
+		followRequestCollection := mongoCli.Database(db).Collection("follow_requests")
 		seedFollowRequest(followRequestCollection, ctx)
 	}
 
 }
-
+func dropDatabase(db string, mongoCli *mongo.Client, ctx *context.Context){
+	err := mongoCli.Database(db).Drop(*ctx)
+	if err != nil {
+		return
+	}
+}
 func seedProfiles(profileCollection *mongo.Collection, ctx *context.Context){
 	//for i := 0; i < 10; i++ {
 	//	var profile domain.Profile
@@ -88,27 +95,27 @@ func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.C
 		bson.D{
 			{"_id", "1231"},
 			{"Timestamp" , time.Now()},
-			{"UserRequested", profil2},
-			{"FollowedAccount", profil5},
+			{"user_requested", profil2},
+			{"followed_account", profil5},
 		},
 
 		bson.D{
 			{"_id", "1232"},
 			{"Timestamp" , time.Now()},
-			{"UserRequested", profil3},
-			{"FollowedAccount", profil4},
+			{"user_requested", profil3},
+			{"followed_account", profil4},
 		},
 		bson.D{
 			{"_id", "1233"},
 			{"Timestamp" , time.Now()},
-			{"UserRequested", profil4},
-			{"FollowedAccount", profil3},
+			{"user_requested", profil4},
+			{"followed_account", profil3},
 		},
 		bson.D{
 			{"_id", "1234"},
 			{"Timestamp" , time.Now()},
-			{"UserRequested", profil6},
-			{"FollowedAccount", profil2},
+			{"user_requested", profil6},
+			{"followed_account", profil2},
 		},
 	})
 	if err != nil {
@@ -127,160 +134,137 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 	_, err := profileFollowingCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "12341"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Following", profil2},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"following", profil2},
 		},
 		bson.D{
 			{"_id", "12342"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Following", profil3},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"following", profil3},
 		},
 		bson.D{
 			{"_id", "12343"},
-			{"CloseFriend",true},
-
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Following", profil4},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"following", profil4},
 		},
 		bson.D{
 			{"_id", "12344"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Following", profil5},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"following", profil5},
 		},
 		bson.D{
 			{"_id", "12345"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Following", profil6},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"following", profil6},
 		},
 		bson.D{
 			{"_id", "12346"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Following", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"following", profil1},
 		},
 		bson.D{
 			{"_id", "12347"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Following", profil3},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"following", profil3},
 		},
 		bson.D{
 			{"_id", "12348"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Following", profil4},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"following", profil4},
 		},
 		bson.D{
 			{"_id", "12349"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Following", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"following", profil1},
 		},
 		bson.D{
 			{"_id", "12350"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Following", profil5},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"following", profil5},
 		},
 		bson.D{
 			{"_id", "12351"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Following", profil6},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"following", profil6},
 		},
 		bson.D{
 			{"_id", "12352"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Following", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"following", profil1},
 		},
 		bson.D{
 			{"_id", "12353"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Following", profil2},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"following", profil2},
 		},
 		bson.D{
 			{"_id", "12354"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Following", profil6},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"following", profil6},
 		},
 
 		bson.D{
 			{"_id", "12355"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Following", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"following", profil1},
 		},
 		bson.D{
 			{"_id", "12356"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Following", profil2},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"following", profil2},
 		},
 		bson.D{
 			{"_id", "12357"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Following", profil3},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"following", profil3},
 		},
 		bson.D{
 			{"_id", "12358"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Following", profil4},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"following", profil4},
 		},
 		bson.D{
 			{"_id", "12359"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Following", profil6},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"following", profil6},
 		},
 
 		bson.D{
 			{"_id", "12360"},
-			{"CloseFriend",false},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Following", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"following", profil1},
 		},
 		bson.D{
 			{"_id", "12361"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Following", profil3},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"following", profil3},
 		},
 		bson.D{
 			{"_id", "12362"},
-			{"CloseFriend",true},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Following", profil4},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"following", profil4},
 		},
 
 	})
@@ -300,124 +284,144 @@ func seedProfileFollowers(followers_collection *mongo.Collection, ctx *context.C
 	_, err := followers_collection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "1234561"},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Follower", profil2},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"follower", profil2},
 		},bson.D{
 			{"_id", "1234562"},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Follower", profil3},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"follower", profil3},
 		},bson.D{
 			{"_id", "1234563"},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Follower", profil4},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"follower", profil4},
 		},bson.D{
 			{"_id", "1234564"},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Follower", profil5},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"follower", profil5},
 		},bson.D{
 			{"_id", "1234565"},
-			{"Timestamp" , time.Now()},
-			{"User", profil1},
-			{"Follower", profil6},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil1},
+			{"follower", profil6},
 		},
 
 		bson.D{
 			{"_id", "1234566"},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Follower", profil1},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234568"},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Follower", profil4},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"follower", profil4},
 		},bson.D{
 			{"_id", "1234569"},
-			{"Timestamp" , time.Now()},
-			{"User", profil2},
-			{"Follower", profil5},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil2},
+			{"follower", profil5},
 		},
 
 		bson.D{
 			{"_id", "1234570"},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Follower", profil1},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234571"},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Follower", profil2},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"follower", profil2},
 		},bson.D{
 			{"_id", "1234572"},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Follower", profil5},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"follower", profil5},
 		},bson.D{
 			{"_id", "1234573"},
-			{"Timestamp" , time.Now()},
-			{"User", profil3},
-			{"Follower", profil6},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil3},
+			{"follower", profil6},
 		},
 
 		bson.D{
 			{"_id", "1234574"},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Follower", profil1},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234575"},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Follower", profil2},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"follower", profil2},
 		},bson.D{
 			{"_id", "1234576"},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Follower", profil5},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"follower", profil5},
 		},bson.D{
 			{"_id", "1234577"},
-			{"Timestamp" , time.Now()},
-			{"User", profil4},
-			{"Follower", profil6},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil4},
+			{"follower", profil6},
 		},
 
 		bson.D{
 			{"_id", "1234578"},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Follower", profil1},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234580"},
-			{"Timestamp" , time.Now()},
-			{"User", profil5},
-			{"Follower", profil3},
+			{"timestamp" , time.Now()},
+			{"user", profil5},
+			{"follower", profil3},
 		},
 
 		bson.D{
 			{"_id", "1234583"},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Follower", profil1},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234584"},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Follower", profil3},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"follower", profil3},
 		},bson.D{
 			{"_id", "1234585"},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Follower", profil4},
+			{"close_friend",true},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"follower", profil4},
 		},bson.D{
 			{"_id", "1234586"},
-			{"Timestamp" , time.Now()},
-			{"User", profil6},
-			{"Follower", profil5},
+			{"close_friend",false},
+			{"timestamp" , time.Now()},
+			{"user", profil6},
+			{"follower", profil5},
 		},
 		})
 

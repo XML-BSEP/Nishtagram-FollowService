@@ -4,7 +4,8 @@ import "time"
 
 type ProfileFollowers struct {
 	ID string `bson:"_id,omitempty" json:"id"`
-	Timestamp time.Time `json:"timestamp"`
-	User Profile `json:"user"`
-	Follower Profile `json:"follower"`
+	CloseFriend bool `bson:"close_friend" json:"close-friend"`
+	Timestamp time.Time `bson:"timestamp" json:"timestamp"`
+	User Profile `bson:"user" json:"user"`
+	Follower Profile `bson:"follower" json:"follower"`
 }
