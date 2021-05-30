@@ -62,21 +62,30 @@ func seedProfiles(profileCollection *mongo.Collection, ctx *context.Context){
 	_, err := profileCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "123451"},
+			{"private", true},
 		},
 		bson.D{
 			{"_id", "123452"},
+			{"private", true},
 		},
 		bson.D{
 			{"_id", "123453"},
+			{"private", true},
+
 		},
 		bson.D{
 			{"_id", "123454"},
+			{"private", false},
+
 		},
 		bson.D{
 			{"_id", "123455"},
+			{"private", false},
 		},
 		bson.D{
 			{"_id", "123456"},
+			{"private", false},
+
 		},
 	})
 	if err != nil {

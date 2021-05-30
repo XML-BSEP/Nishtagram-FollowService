@@ -21,8 +21,8 @@ type followRequestRepo struct {
 }
 
 func (f followRequestRepo) CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	_, err := f.collection.InsertOne(ctx, *req)
 
 	if err != nil {
@@ -32,15 +32,16 @@ func (f followRequestRepo) CreateFollowRequest(req *domain.FollowRequest) (*doma
 }
 
 func (f followRequestRepo) GetByID(id string) *mongo.SingleResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result :=f.collection.FindOne(ctx, bson.M{"_id": id})
 	return result
 }
 
 func (f followRequestRepo) Delete(id string) *mongo.DeleteResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {

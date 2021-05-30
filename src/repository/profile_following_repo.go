@@ -21,7 +21,8 @@ type followingRepo struct {
 }
 
 func (f followingRepo) CreateFollowing(following *domain.ProfileFollowing) (*domain.ProfileFollowing, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	_, err := f.collection.InsertOne(ctx, *following)
 
@@ -32,14 +33,16 @@ func (f followingRepo) CreateFollowing(following *domain.ProfileFollowing) (*dom
 }
 
 func (f followingRepo) GetByID(id string) *mongo.SingleResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result := f.collection.FindOne(ctx, bson.M{"_id": id})
 	return result
 }
 
 func (f followingRepo) Delete(id string) *mongo.DeleteResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
 
