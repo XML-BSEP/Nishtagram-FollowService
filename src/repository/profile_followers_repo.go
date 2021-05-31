@@ -10,7 +10,7 @@ import (
 )
 
 type FollowerRepo interface {
-	CreateFollower(follower *domain.ProfileFollowers) (*domain.ProfileFollowers, error)
+	CreateFollower(follower *domain.ProfileFollower) (*domain.ProfileFollower, error)
 	GetByID(id string) *mongo.SingleResult
 	Delete(id string) *mongo.DeleteResult
 }
@@ -20,8 +20,9 @@ type followerRepo struct {
 	db *mongo.Client
 }
 
-func (f *followerRepo) CreateFollower(follower *domain.ProfileFollowers) (*domain.ProfileFollowers, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+func (f *followerRepo) CreateFollower(follower *domain.ProfileFollower) (*domain.ProfileFollower, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	_, err := f.collection.InsertOne(ctx, *follower)
 
@@ -32,14 +33,16 @@ func (f *followerRepo) CreateFollower(follower *domain.ProfileFollowers) (*domai
 	return follower, nil
 }
 func (f followerRepo) GetByID(id string) *mongo.SingleResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result := f.collection.FindOne(ctx, bson.M{"_id": id})
 	return result
 }
 
 func (f followerRepo) Delete(id string) *mongo.DeleteResult {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
 
