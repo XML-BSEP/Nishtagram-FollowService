@@ -35,13 +35,7 @@ func NewMongoClient() (*mongo.Client, *context.Context){
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer client.Disconnect(ctx)
 
-
-	// Check the connection
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)

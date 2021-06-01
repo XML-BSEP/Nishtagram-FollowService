@@ -58,34 +58,26 @@ func seedProfiles(profileCollection *mongo.Collection, ctx *context.Context){
 	//	)
 	//}
 
+	//IDEJA JE DA SU PRVA 3 PRIVATE, A OSTALI NISU
 
 	_, err := profileCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
-			{"_id", "123451"},
-			{"private", true},
+			{"_id", "e2b5f92e-c31b-11eb-8529-0242ac130003"},
 		},
 		bson.D{
-			{"_id", "123452"},
-			{"private", true},
+			{"_id", "424935b1-766c-4f99-b306-9263731518bc"},
 		},
 		bson.D{
-			{"_id", "123453"},
-			{"private", true},
-
+			{"_id", "a2c2f993-dc32-4a82-82ed-a5f6866f7d03"},
 		},
 		bson.D{
-			{"_id", "123454"},
-			{"private", false},
-
+			{"_id", "43420055-3174-4c2a-9823-a8f060d644c3"},
 		},
 		bson.D{
-			{"_id", "123455"},
-			{"private", false},
+			{"_id", "ead67925-e71c-43f4-8739-c3b823fe21bb"},
 		},
 		bson.D{
-			{"_id", "123456"},
-			{"private", false},
-
+			{"_id", "23ddb1dd-4303-428b-b506-ff313071d5d7"},
 		},
 	})
 	if err != nil {
@@ -94,11 +86,11 @@ func seedProfiles(profileCollection *mongo.Collection, ctx *context.Context){
 }
 
 func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.Context){
-	profil2 := domain.Profile{ID: "123452"}
-	profil3 := domain.Profile{ID: "123453"}
-	profil4 := domain.Profile{ID: "123454"}
-	profil5 := domain.Profile{ID: "123455"}
-	profil6 := domain.Profile{ID: "123456"}
+	profil2 := domain.Profile{ID: "424935b1-766c-4f99-b306-9263731518bc"}
+	profil3 := domain.Profile{ID: "a2c2f993-dc32-4a82-82ed-a5f6866f7d03"}
+	profil4 := domain.Profile{ID: "43420055-3174-4c2a-9823-a8f060d644c3"}
+	profil5 := domain.Profile{ID: "ead67925-e71c-43f4-8739-c3b823fe21bb"}
+	profil6 := domain.Profile{ID: "23ddb1dd-4303-428b-b506-ff313071d5d7"}
 
 	_, err := followRequestCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
@@ -133,12 +125,12 @@ func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.C
 }
 
 func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *context.Context){
-	profil1 := domain.Profile{ID: "123451"}
-	profil2 := domain.Profile{ID: "123452"}
-	profil3 := domain.Profile{ID: "123453"}
-	profil4 := domain.Profile{ID: "123454"}
-	profil5 := domain.Profile{ID: "123455"}
-	profil6 := domain.Profile{ID: "123456"}
+	profil1 := domain.Profile{ID: "e2b5f92e-c31b-11eb-8529-0242ac130003"}
+	profil2 := domain.Profile{ID: "424935b1-766c-4f99-b306-9263731518bc"}
+	profil3 := domain.Profile{ID: "a2c2f993-dc32-4a82-82ed-a5f6866f7d03"}
+	profil4 := domain.Profile{ID: "43420055-3174-4c2a-9823-a8f060d644c3"}
+	profil5 := domain.Profile{ID: "ead67925-e71c-43f4-8739-c3b823fe21bb"}
+	profil6 := domain.Profile{ID: "23ddb1dd-4303-428b-b506-ff313071d5d7"}
 
 	_, err := profileFollowingCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
@@ -282,15 +274,15 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 	}
 }
 
-func seedProfileFollowers(followers_collection *mongo.Collection, ctx *context.Context) {
-	profil1 := domain.Profile{ID: "123451"}
-	profil2 := domain.Profile{ID: "123452"}
-	profil3 := domain.Profile{ID: "123453"}
-	profil4 := domain.Profile{ID: "123454"}
-	profil5 := domain.Profile{ID: "123455"}
-	profil6 := domain.Profile{ID: "123456"}
+func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Context) {
+	profil1 := domain.Profile{ID: "e2b5f92e-c31b-11eb-8529-0242ac130003"}
+	profil2 := domain.Profile{ID: "424935b1-766c-4f99-b306-9263731518bc"}
+	profil3 := domain.Profile{ID: "a2c2f993-dc32-4a82-82ed-a5f6866f7d03"}
+	profil4 := domain.Profile{ID: "43420055-3174-4c2a-9823-a8f060d644c3"}
+	profil5 := domain.Profile{ID: "ead67925-e71c-43f4-8739-c3b823fe21bb"}
+	profil6 := domain.Profile{ID: "23ddb1dd-4303-428b-b506-ff313071d5d7"}
 
-	_, err := followers_collection.InsertMany(*ctx, []interface{}{
+	_, err := followersCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "1234561"},
 			{"close_friend",true},
@@ -397,11 +389,14 @@ func seedProfileFollowers(followers_collection *mongo.Collection, ctx *context.C
 
 		bson.D{
 			{"_id", "1234578"},
+			{"close_friend", false},
 			{"timestamp" , time.Now()},
 			{"user", profil5},
 			{"follower", profil1},
 		},bson.D{
 			{"_id", "1234580"},
+			{"close_friend", false},
+
 			{"timestamp" , time.Now()},
 			{"user", profil5},
 			{"follower", profil3},
