@@ -1,6 +1,6 @@
 package dto
 
 type Unfollow struct {
-	UserToUnfollow  ProfileDTO `bson:"following"`
-	UserUnfollowing ProfileDTO `bson:"user"`
+	UserToUnfollow  string `bson:"following" json:"following"`
+	UserUnfollowing string `bson:"user" json:"user"`
 }

@@ -34,6 +34,8 @@ func (f followerHandler) GetAllUsersFollowers(ctx *gin.Context) {
 	return
 }
 
+
+
 func NewFollowerHandler(u usecase.FollowerUseCase) FollowerHandler {
 	return &followerHandler{u}
 }

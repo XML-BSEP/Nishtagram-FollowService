@@ -12,20 +12,27 @@ import (
 type FollowingUseCase interface {
 	CreateFollowing(following *domain.ProfileFollowing) (*domain.ProfileFollowing, error)
 	GetByID(id string) *mongo.SingleResult
-	Delete(id string) *mongo.DeleteResult
+	Delete(ctx context.Context,id string) *mongo.DeleteResult
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error)
 	Unfollow(ctx context.Context, unfollow dto.Unfollow) error
 }
 
 type followingUseCase struct {
-	FollowingRepo        repository.FollowingRepo
+	FollowingRepo       repository.FollowingRepo
+	FollowerRepo 		repository.FollowerRepo
 	//ProfileRepo          repository.ProfileRepo
 	//FollowRequestUseCase FollowRequestUseCase
 	//FollowerUseCase FollowerUseCase
 }
 
 func (f followingUseCase) Unfollow(ctx  context.Context, unfollow dto.Unfollow) error {
-	return f.FollowingRepo.Unfollow(ctx, unfollow)
+	if err := f.FollowingRepo.RemoveFollowing(ctx, unfollow);err !=nil{
+		return err
+	}
+	if err := f.FollowerRepo.RemoveFollower(ctx,unfollow); err!=nil{
+		return err
+	}
+	return nil
 }
 
 func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error) {
@@ -79,22 +86,23 @@ func (f followingUseCase) GetByID(id string) *mongo.SingleResult {
 	return f.FollowingRepo.GetByID(id)
 }
 
-func (f followingUseCase) Delete(id string) *mongo.DeleteResult {
+func (f followingUseCase) Delete(ctx context.Context, id string) *mongo.DeleteResult {
 	//if f.FollowerUseCase.Delete(id).DeletedCount==1{
-		return f.FollowingRepo.Delete(id)
+		return f.FollowingRepo.Delete(ctx, id)
 	//}else{
 	//	return &mongo.DeleteResult{DeletedCount: 0}
 	//}
 
 }
 
-func NewFollowingUseCase(followRepo repository.FollowingRepo,
+func NewFollowingUseCase(followingRepo repository.FollowingRepo,
 						//profileRepo repository.ProfileRepo,
 						//followReqUseCase FollowRequestUseCase,
-						//followerUseCase FollowerUseCase
-) FollowingUseCase {
+						//followerUseCase FollowerUseCase,
+						followerRepo repository.FollowerRepo,) FollowingUseCase {
 	return &followingUseCase{
-		FollowingRepo:         followRepo,
+		FollowingRepo: followingRepo,
+		FollowerRepo:  followerRepo,
 		//ProfileRepo:           profileRepo,
 		//FollowRequestUseCase : followReqUseCase,
 		//FollowerUseCase: followerUseCase,

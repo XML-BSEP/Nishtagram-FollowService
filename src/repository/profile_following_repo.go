@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"time"
@@ -15,9 +16,9 @@ import (
 type FollowingRepo interface {
 	CreateFollowing(following *domain.ProfileFollowing) (*domain.ProfileFollowing, error)
 	GetByID(id string) *mongo.SingleResult
-	Delete(id string) *mongo.DeleteResult
+	Delete(ctx context.Context, id string) *mongo.DeleteResult
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, error)
-	Unfollow(ctx context.Context, unfollow dto.Unfollow) error
+	RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error
 
 }
 
@@ -26,10 +27,21 @@ type followingRepo struct {
 	db *mongo.Client
 }
 
-func (f followingRepo) Unfollow(ctx context.Context, unfollow dto.Unfollow) error {
+func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error {
 	var following bson.M
 	fmt.Println(unfollow)
-	err := f.collection.FindOne(ctx, bson.M{"user": unfollow.UserUnfollowing, "following":unfollow.UserToUnfollow}).Decode(&following)
+	followingBson := bson.M{"_id" :unfollow.UserUnfollowing}
+
+	userBson := bson.M{"_id" : unfollow.UserToUnfollow}
+
+	// ja pratim peru i hocu peru da otpratim
+	// u ovom slucaju ja sam userUnfollowing, a pera je UserToUnfollow
+
+	//sto znaci da ja trebam da budem obrisan iz tabele kao follower
+	//a pera kao user
+
+
+	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "following":followingBson}).Decode(&following)
 	if err !=nil{
 		log.Fatal(err)
 		return err
@@ -43,12 +55,12 @@ func (f followingRepo) Unfollow(ctx context.Context, unfollow dto.Unfollow) erro
 		return err
 	}
 
+	result := f.Delete(ctx, fusrodah.ID)
 
-	if f.Delete(fusrodah.ID).DeletedCount==1{
+	if result.DeletedCount==1{
 		return nil
 	}else{
 		err1 := errors.New("deleting error: no followings deleted")
-
 		return err1
 	}
 
@@ -93,11 +105,18 @@ func (f followingRepo) GetByID(id string) *mongo.SingleResult {
 	return result
 }
 
-func (f followingRepo) Delete(id string) *mongo.DeleteResult {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+func (f followingRepo) Delete(ctx context.Context, id string) *mongo.DeleteResult {
 
-	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
+	result, err := f.collection.DeleteOne(ctx, bson.M{"_id" :id})
+
+	if result.DeletedCount==0{
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err!=nil{
+			return result
+		}
+		result, err = f.collection.DeleteOne(ctx, bson.M{"_id" :objID})
+
+	}
 
 	if err != nil {
 		log.Fatal("DeleteOne() ERROR:", err)

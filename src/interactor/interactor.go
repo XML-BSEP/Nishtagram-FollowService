@@ -31,7 +31,7 @@ func (i *interactor) NewFollowingRepository() repository.FollowingRepo {
 }
 
 func (i *interactor) NewFollowingUseCase() usecase.FollowingUseCase {
-	return usecase.NewFollowingUseCase(i.NewFollowingRepository())
+	return usecase.NewFollowingUseCase(i.NewFollowingRepository(), i.NewFollowerRepository())
 }
 
 func (i *interactor) NewFollowingHandler() handler.FollowingHandler {
