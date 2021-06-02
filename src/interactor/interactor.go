@@ -15,7 +15,7 @@ func (i *interactor) NewRequestRepository() repository.FollowRequestRepo {
 }
 
 func (i *interactor) NewRequestUseCase() usecase.FollowRequestUseCase {
-	return usecase.NewFollowRequestUseCase(i.NewRequestRepository())
+	return usecase.NewFollowRequestUseCase(i.NewRequestRepository(), i.NewFollowerRepository(), i.NewFollowingRepository())
 }
 
 func (i *interactor) NewRequestHandler() handler.FollowRequestHandler {

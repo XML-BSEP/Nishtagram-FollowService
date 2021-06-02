@@ -1,6 +1,7 @@
 package dto
 
-type Follow struct {
-	UserToFollow  ProfileDTO `bson:"follower"`
-	UserFollowing ProfileDTO `bson:"user"`
+type FollowDTO struct {
+	Follower ProfileDTO `bson:"follower"`
+	User     ProfileDTO `bson:"user"`
 }
+

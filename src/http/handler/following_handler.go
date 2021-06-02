@@ -25,14 +25,16 @@ func (f followingHandler) GetAllUsersFollowings(ctx *gin.Context) {
 
 	if decode_err!=nil{
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+		return
 	}
 	followers, err := f.FollowingUseCase.GetAllUsersFollowings(t)
 	if err!=nil{
 		//TODO: HANDLE RESPONSE ERROR
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": followers})
+	return
 }
 
 func (f followingHandler) Unfollow(ctx *gin.Context) {
@@ -42,15 +44,17 @@ func (f followingHandler) Unfollow(ctx *gin.Context) {
 	decode_err := decoder.Decode(&t)
 
 	if decode_err!=nil{
-		//TODO: HANDLE DECODING ERROR
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+		return
 	}
 
 	err := f.FollowingUseCase.Unfollow(ctx,t)
 	if err!= nil{
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{})
+	return
 }
 
 func NewFollowingHandler(u usecase.FollowingUseCase) FollowingHandler {
