@@ -1,7 +1,7 @@
 package helpers
 
 import (
-"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 // Response object as HTTP response

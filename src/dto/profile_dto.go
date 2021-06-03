@@ -1,6 +1,11 @@
 package dto
 
+import "FollowService/domain"
+
 type ProfileDTO struct {
 	ID string `bson:"_id,omitempty" json:"id"`
-	IsPrivate bool `bson:"private" json:"private"`
+}
+
+func NewProfileDTOToNewProfile(dto ProfileDTO) domain.Profile{
+	return domain.Profile{ID:dto.ID}
 }

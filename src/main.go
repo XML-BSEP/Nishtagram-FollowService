@@ -1,12 +1,13 @@
 package main
 
 import (
+	"FollowService/http/router"
 	"FollowService/infrastructure/mongo"
 	"FollowService/infrastructure/seeder"
-	"FollowService/repository"
-	"FollowService/usecase"
-	"fmt"
+	"FollowService/interactor"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
@@ -14,17 +15,30 @@ func main() {
 	db := mongo.GetDbName()
 
 	seeder.SeedData(db, mongoCli, ctx)
-	//profile4 := domain.Profile{ID: "123454"}
-	//profile5 := domain.Profile{ID: "123455"}
-	//following := domain.ProfileFollowing{Following: profile4, User: profile5, Timestamp: time.Now()}
-	followingRepo := repository.NewFollowingRepo(mongoCli)
-	followingService := usecase.NewFollowingService(followingRepo)
 
-	//_, _ = followingRepo.CreateFollowing(&following)
+	i := interactor.NewInteractor(mongoCli)
+	appHandler := i.NewAppHandler()
+	g := router.NewRouter(appHandler)
 
-	p,_ := followingService.GetByID("12341")
-	fmt.Println(p)
-	g := gin.Default()
+	//g := gin.Default()
+	g.Use(gin.Logger())
+	g.Use(gin.Recovery())
+
+	//TODO: check about possible changes in middleware
+	g.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		//AllowOriginFunc: func(origin string) bool {
+		//	return origin == "https://github.com"
+		//},
+		MaxAge: 12 * time.Hour,
+	}))
+
+	//todo: check this middleware thingy out
+	//g.Use(static.Serve("/static", static.LocalFile("/assets", false)))
 
 	g.Run("localhost:8089")
 }
