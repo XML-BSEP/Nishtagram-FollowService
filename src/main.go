@@ -5,6 +5,7 @@ import (
 	"FollowService/infrastructure/mongo"
 	"FollowService/infrastructure/seeder"
 	"FollowService/interactor"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -19,8 +20,8 @@ func main() {
 	g := router.NewRouter(appHandler)
 
 	//g := gin.Default()
-	//g.Use(gin.Logger())
-	//g.Use(gin.Recovery())
+	g.Use(gin.Logger())
+	g.Use(gin.Recovery())
 
 	//TODO: check about possible changes in middleware
 	//g.Use(cors.New(cors.Config{
