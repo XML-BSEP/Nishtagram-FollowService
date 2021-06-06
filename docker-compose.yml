@@ -27,17 +27,17 @@ services:
     restart: on-failure  
 
 
-  follow-microservice:
+  followms:
     image: followimg
-    container_name: follow-microservice
+    container_name: followms
     depends_on:
       - mongofollow
     environment:
-      - PORT=8089
+      - PORT=5000
     networks:
       - demo
     ports:
-      - '8089:8089'
+      - 5000:8089
     volumes:
       - follow-data:/data/db:rw
 

@@ -23,6 +23,6 @@ func main() {
 	g.Use(gin.Logger())
 	g.Use(gin.Recovery())
 
-	g.Run("localhost:8089")
+	g.Run(":8089")
 
 }
