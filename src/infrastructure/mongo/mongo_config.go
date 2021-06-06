@@ -25,12 +25,20 @@ func GetDbName() string{
 	init_viper()
 	return viper.GetString(`database`)
 }
-
+func GetDocker() bool{
+	init_viper()
+	return viper.GetBool(`docker`)
+}
 func NewMongoClient() (*mongo.Client, *context.Context){
 	init_viper()
-	mongodb_uri := viper.GetString(`mongodb_uri`)
+	var mongo_uri string
+	if GetDocker(){
+		mongo_uri = viper.GetString(`mongodb_uri_docker`)
+	}else{
+		mongo_uri = viper.GetString(`mongodb_uri_localhost`)
+	}
 
-	clientOptions := options.Client().ApplyURI(mongodb_uri)
+	clientOptions := options.Client().ApplyURI(mongo_uri)
 	client, err := mongo.NewClient(clientOptions)
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
