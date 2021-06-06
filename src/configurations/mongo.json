@@ -1,12 +1,11 @@
 {
   "production" : false,
-  "mongodb_uri" : "mongodb://localhost:27017",
+  "mongodb_uri" : "mongodb://mongofollow:27017",
   "server" : {
-    "address" : "localhost",
+    "address" : "mongofollow",
     "port" : 27017
   },
   "database" : "follow_db",
   "production_server" : {
-
   }
 }

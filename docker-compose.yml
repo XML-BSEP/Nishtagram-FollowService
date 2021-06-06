@@ -1,22 +1,44 @@
 version: '3.7'
-services:
 
-  # MongoDB
-  mongo:
+volumes:
+  follow-data: {}
+
+
+networks:
+  demo:
+    name: demo
+    driver: bridge
+  node_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
+services:
+  mongofollow:
     image: 'mongo:4.2.6-bionic'
-    container_name: mongo
+    container_name: mongofollow
     ports:
       - '27017:27017'
+    networks:
+      - demo
     volumes:
-      - ./mongodata:/data/db
-    restart: always
+      - follow-data:/data/db
+    restart: on-failure  
 
-  # Mongo Express Web-based MongoDB admin interface
-  mongo_express:
-    image: mongo-express
-    container_name: mongo_express
+
+  follow-microservice:
+    image: followimg
+    container_name: follow-microservice
     depends_on:
-      - 'mongo'
+      - mongofollow
+    environment:
+      - PORT=8089
+    networks:
+      - demo
     ports:
-      - '8081:8091'
-    restart: always
+      - '8089:8089'
+    volumes:
+      - follow-data:/data/db:rw
+
+  
