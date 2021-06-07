@@ -16,11 +16,31 @@ type FollowRequestRepo interface {
 	Delete(id string) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]bson.M, error)
 	GetFollowRequestByUserAndFollower(ctx context.Context, req dto.FollowRequestDTO) (bson.M, error)
+	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
+	ExistsProfileIds(ctx context.Context, following *domain.FollowRequest) error
 }
 
 type followRequestRepo struct {
 	collection *mongo.Collection
 	db *mongo.Client
+}
+
+func (f *followRequestRepo) ExistsProfileIds(ctx context.Context, following *domain.FollowRequest) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var val *domain.ProfileFollowing
+	return f.collection.FindOne(ctx, bson.M{"user_requested._id": following.UserRequested.ID, "followed_account._id": following.FollowedAccount.ID}).Decode(&val)
+}
+
+func (f *followRequestRepo) IsCreated(ctx context.Context, request *domain.FollowRequest) bool {
+	err := f.ExistsProfileIds(ctx, request)
+
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 func (f followRequestRepo) GetFollowRequestByUserAndFollower(ctx context.Context, req dto.FollowRequestDTO) (bson.M, error) {

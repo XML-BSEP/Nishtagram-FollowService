@@ -31,11 +31,11 @@ func (i *interactor) NewFollowingRepository() repository.FollowingRepo {
 }
 
 func (i *interactor) NewFollowingUseCase() usecase.FollowingUseCase {
-	return usecase.NewFollowingUseCase(i.NewFollowingRepository(), i.NewFollowerRepository())
+	return usecase.NewFollowingUseCase(i.NewFollowingRepository(), i.NewRequestUseCase(), i.NewFollowerUseCase(), i.NewFollowerRepository())
 }
 
 func (i *interactor) NewFollowingHandler() handler.FollowingHandler {
-	return handler.NewFollowingHandler(i.NewFollowingUseCase())
+	return handler.NewFollowingHandler(i.NewFollowingUseCase(), i.NewRequestUseCase())
 }
 
 

@@ -16,6 +16,7 @@ type FollowRequestUseCase interface {
 	Delete(id string) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.Profile, error)
 	ApprofeFollowRequest(ctx context.Context,req dto.FollowRequestDTO) error
+	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
 }
 
 type followRequestUseCase struct {
@@ -23,6 +24,10 @@ type followRequestUseCase struct {
 	FollowerRepository repository.FollowerRepo
 	FollowingRepository repository.FollowingRepo
 
+}
+
+func (f *followRequestUseCase) IsCreated(ctx context.Context, request *domain.FollowRequest) bool {
+	return f.FollowRequestRepo.IsCreated(ctx, request)
 }
 
 func (f followRequestUseCase) ApprofeFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error {

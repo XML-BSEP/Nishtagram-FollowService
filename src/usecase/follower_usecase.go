@@ -4,6 +4,7 @@ import (
 	"FollowService/domain"
 	"FollowService/dto"
 	"FollowService/repository"
+	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -13,7 +14,7 @@ type FollowerUseCase interface {
 	GetByID(id string) *mongo.SingleResult
 	Delete(id string) *mongo.DeleteResult
 	GetAllUsersFollowers(user dto.ProfileDTO) ([]*domain.Profile, error)
-
+	AlreadyFollowing (ctx context.Context, following *domain.ProfileFollowing) (bool, error)
 }
 
 type followerUseCase struct {
@@ -39,6 +40,11 @@ func (f followerUseCase) GetAllUsersFollowers(user dto.ProfileDTO) ([]*domain.Pr
 	}
 
 	return usersFollowers,nil
+}
+
+
+func (f *followerUseCase) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error) {
+	return f.FollowerRepo.AlreadyFollowing(ctx, following)
 }
 
 func (f followerUseCase) CreateFollower(follower *domain.ProfileFollower) (*domain.ProfileFollower, error) {
