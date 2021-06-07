@@ -79,6 +79,9 @@ func seedProfiles(profileCollection *mongo.Collection, ctx *context.Context){
 		bson.D{
 			{"_id", "23ddb1dd-4303-428b-b506-ff313071d5d7"},
 		},
+		bson.D{
+			{"_id","bdb7d7c5-2c9a-4b4c-ab64-4e4828d93926"},
+		},
 	})
 	if err != nil {
 		log.Fatal(err)
