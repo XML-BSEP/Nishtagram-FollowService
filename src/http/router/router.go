@@ -33,6 +33,8 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.POST("/usersFollowers", handler.GetAllUsersFollowers)
 	router.POST("/usersFollowRequests", handler.GetAllUsersFollowRequests)
 	router.POST("/approveRequest", handler.ApproveRequest)
+	router.POST("/follow", handler.Follow)
+	router.POST("/isAllowedToFollow", handler.IsAllowedToFollow)
 
 	return router
 }

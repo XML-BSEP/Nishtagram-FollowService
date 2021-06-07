@@ -18,12 +18,30 @@ type FollowerRepo interface {
 	Delete(id string) *mongo.DeleteResult
 	GetAllUsersFollowers(user dto.ProfileDTO) ([]bson.M, error)
 	RemoveFollower(ctx context.Context, unfollow dto.Unfollow) error
+	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error)
 
 }
 
 type followerRepo struct {
 	collection *mongo.Collection
 	db *mongo.Client
+}
+
+func (f *followerRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	/*userBson := bson.M{"_id" : following.User}
+	followingBson := bson.M{"_id" : following.Following}*/
+
+	var val *domain.ProfileFollowing
+	err := f.collection.FindOne(ctx, bson.M{"user._id" : following.User.ID, "following._id" : following.Following.ID}).Decode(&val)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, err
 }
 
 func (f *followerRepo) RemoveFollower(ctx context.Context, unfollow dto.Unfollow) error {

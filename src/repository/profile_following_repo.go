@@ -19,12 +19,31 @@ type FollowingRepo interface {
 	Delete(ctx context.Context, id string) *mongo.DeleteResult
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, error)
 	RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error
-
+	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
+	ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error
 }
 
 type followingRepo struct {
 	collection *mongo.Collection
 	db *mongo.Client
+}
+
+func (f *followingRepo) ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var val *domain.ProfileFollowing
+	return f.collection.FindOne(ctx, bson.M{"user._id": following.User.ID, "following._id": following.Following.ID}).Decode(&val)
+}
+
+func (f *followingRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool {
+	err := f.ExistsProfileIds(ctx, following)
+
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error {
