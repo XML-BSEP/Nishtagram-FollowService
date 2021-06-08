@@ -14,6 +14,7 @@ type FollowingHandler interface {
 	GetAllUsersFollowings(ctx *gin.Context)
 	Follow(ctx *gin.Context)
 	IsAllowedToFollow(ctx *gin.Context)
+
 }
 
 type followingHandler struct {
@@ -30,6 +31,11 @@ func (f *followingHandler) IsAllowedToFollow(ctx *gin.Context) {
 		return
 	}
 
+	if followDto.Follower.ID==followDto.User.ID{
+		ctx.JSON(400, gin.H{"message" : "Its you, you moron!"})
+		return
+	}
+
 	profileFollowing := mapper.FollowDtoToProfileFollowing(followDto)
 	if f.FollowingUseCase.AlreadyFollowing(ctx, profileFollowing) {
 		ctx.JSON(400, gin.H{"message" : "You are already following user"})
@@ -38,7 +44,7 @@ func (f *followingHandler) IsAllowedToFollow(ctx *gin.Context) {
 
 	followingRequest := mapper.FollowDtoToFollowRequest(followDto)
 	if f.FollowingRequestUsecase.IsCreated(ctx, followingRequest) {
-		ctx.JSON(400, gin.H{"message" : "Request already sent"})
+		ctx.JSON(400 , gin.H{"message" : "Request already sent"})
 		return
 	}
 

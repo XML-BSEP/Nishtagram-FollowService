@@ -18,6 +18,7 @@ type FollowRequestRepo interface {
 	GetFollowRequestByUserAndFollower(ctx context.Context, req dto.FollowRequestDTO) (bson.M, error)
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
 	ExistsProfileIds(ctx context.Context, following *domain.FollowRequest) error
+	GetFollowRequest(ctx context.Context, following *dto.FollowRequestDTO) (*domain.FollowRequest, error)
 }
 
 type followRequestRepo struct {
@@ -25,11 +26,21 @@ type followRequestRepo struct {
 	db *mongo.Client
 }
 
+func (f *followRequestRepo) GetFollowRequest(ctx context.Context, following *dto.FollowRequestDTO) (*domain.FollowRequest, error) {
+	var val *domain.FollowRequest
+	err := f.collection.FindOne(ctx, bson.M{"user_requested._id": following.UserRequested, "followed_account._id": following.FollowedAccount}).Decode(&val)
+	if err!=nil{
+		return nil, err
+	}else{
+		return val,err
+	}
+}
+
 func (f *followRequestRepo) ExistsProfileIds(ctx context.Context, following *domain.FollowRequest) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	var val *domain.ProfileFollowing
+	var val *domain.FollowRequest
 	return f.collection.FindOne(ctx, bson.M{"user_requested._id": following.UserRequested.ID, "followed_account._id": following.FollowedAccount.ID}).Decode(&val)
 }
 
