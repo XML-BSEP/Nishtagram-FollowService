@@ -18,6 +18,7 @@ type FollowingUseCase interface {
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error)
 	Unfollow(ctx context.Context, unfollow dto.Unfollow) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
+	GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error)
 }
 
 type followingUseCase struct {
@@ -26,6 +27,16 @@ type followingUseCase struct {
 	//ProfileRepo          repository.ProfileRepo
 	FollowRequestUseCase FollowRequestUseCase
 	FollowerUseCase FollowerUseCase
+}
+
+func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error) {
+	following, _ := f.GetAllUsersFollowings(dto.ProfileDTO{ID: userId})
+	var retVal []dto.FollowingDTO
+	for _, follow := range following {
+		profile, _ := gateway.GetUser(context.Background(), follow.ID)
+		retVal = append(retVal, dto.FollowingDTO{Id: userId, ProfilePhoto: profile.ProfilePhoto, Username: profile.Username})
+	}
+	return retVal, nil
 }
 
 func (f followingUseCase) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool {
@@ -49,6 +60,7 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 		return nil, err
 	}
 	var usersFollowings []*domain.Profile
+
 	for _, uf := range userFollowingBson {
 		bsonBytes, _ := bson.Marshal(uf)
 		var following *domain.ProfileFollowing
@@ -57,6 +69,7 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 		if err != nil {
 			return nil, err
 		}
+
 		usersFollowings = append(usersFollowings, &following.Following)
 	}
 	return usersFollowings, nil
