@@ -33,3 +33,20 @@ func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 
 	return privacyCheckResponseDto.IsPrivate, err
 }
+
+
+func GetUser(ctx context.Context, userId string) (dto.ProfileUsernameImageDTO, error) {
+	client := resty2.New()
+	resp, _ := client.R().
+		EnableTrace().
+		Get("https://127.0.0.1:8082/getProfileUsernameImageById?userId=" + userId)
+
+	var responseDTO dto.ProfileUsernameImageDTO
+	err := json.Unmarshal(resp.Body(), &responseDTO)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return responseDTO, nil
+}
+
