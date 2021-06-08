@@ -4,6 +4,7 @@ import (
 	"FollowService/dto"
 	"FollowService/infrastructure/mapper"
 	"FollowService/usecase"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,12 +15,31 @@ type FollowingHandler interface {
 	GetAllUsersFollowings(ctx *gin.Context)
 	Follow(ctx *gin.Context)
 	IsAllowedToFollow(ctx *gin.Context)
-
+	GetAllFollowingFront(ctx *gin.Context)
 }
 
 type followingHandler struct {
 	FollowingUseCase usecase.FollowingUseCase
 	FollowingRequestUsecase usecase.FollowRequestUseCase
+}
+
+func (f *followingHandler) GetAllFollowingFront(ctx *gin.Context) {
+	decoder := json.NewDecoder(ctx.Request.Body)
+	var t dto.ProfileDTO
+	decode_err := decoder.Decode(&t)
+
+	if decode_err!=nil{
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+		return
+	}
+	followers, err := f.FollowingUseCase.GetUserFollowingsForFrontend(context.Background(), t.ID)
+	if err!=nil{
+		//TODO: HANDLE RESPONSE ERROR
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, followers)
+	return
 }
 
 func (f *followingHandler) IsAllowedToFollow(ctx *gin.Context) {
