@@ -4,6 +4,7 @@ import (
 	"FollowService/dto"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	resty2 "github.com/go-resty/resty/v2"
 )
@@ -21,6 +22,9 @@ func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 		return false, err
 	}
 
+	if resp.StatusCode() != 200 {
+		return false, fmt.Errorf("Err")
+	}
 
 	var privacyCheckResponseDto dto.PrivacyCheckResponseDto
 	if err := json.Unmarshal(resp.Body(), &privacyCheckResponseDto); err != nil {
