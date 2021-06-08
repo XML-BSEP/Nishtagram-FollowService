@@ -17,6 +17,7 @@ type FollowRequestUseCase interface {
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.Profile, error)
 	ApprofeFollowRequest(ctx context.Context,req dto.FollowRequestDTO) error
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
+	CancelFollowRequest(ctx context.Context, request *dto.FollowRequestDTO) error
 }
 
 type followRequestUseCase struct {
@@ -24,6 +25,17 @@ type followRequestUseCase struct {
 	FollowerRepository repository.FollowerRepo
 	FollowingRepository repository.FollowingRepo
 
+}
+func (f *followRequestUseCase) CancelFollowRequest(ctx context.Context, request *dto.FollowRequestDTO) error {
+	followReq, err := f.FollowRequestRepo.GetFollowRequest(ctx,request)
+	if err!=nil{
+		return err
+	}
+	if asd,_ := f.Delete(followReq.ID); asd.DeletedCount==1{
+		return  nil
+	}else{
+		return err
+	}
 }
 
 func (f *followRequestUseCase) IsCreated(ctx context.Context, request *domain.FollowRequest) bool {

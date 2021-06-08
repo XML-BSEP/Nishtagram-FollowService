@@ -51,7 +51,7 @@ func (f *followingHandler) IsAllowedToFollow(ctx *gin.Context) {
 		return
 	}
 
-	if followDto.User.ID == followDto.Follower.ID {
+	if followDto.Follower.ID==followDto.User.ID{
 		ctx.JSON(400, gin.H{"message" : "Its you, you moron!"})
 		return
 	}
@@ -64,7 +64,7 @@ func (f *followingHandler) IsAllowedToFollow(ctx *gin.Context) {
 
 	followingRequest := mapper.FollowDtoToFollowRequest(followDto)
 	if f.FollowingRequestUsecase.IsCreated(ctx, followingRequest) {
-		ctx.JSON(400, gin.H{"message" : "Request already sent"})
+		ctx.JSON(400 , gin.H{"message" : "Request already sent"})
 		return
 	}
 
