@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,6 +27,7 @@ type FollowingRepo interface {
 type followingRepo struct {
 	collection *mongo.Collection
 	db *mongo.Client
+	logger *logger.Logger
 }
 
 func (f *followingRepo) ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error {
@@ -40,6 +42,7 @@ func (f *followingRepo) AlreadyFollowing(ctx context.Context, following *domain.
 	err := f.ExistsProfileIds(ctx, following)
 
 	if err != nil {
+		f.logger.Logger.Errorf("existing in profile error %v\n", err)
 		return false
 	}
 
@@ -62,7 +65,8 @@ func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollo
 
 	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "following":followingBson}).Decode(&following)
 	if err !=nil{
-		log.Fatal(err)
+		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
+		//log.Fatal(err)
 		return err
 	}
 
@@ -71,6 +75,7 @@ func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollo
 	bsonBytes, _ := bson.Marshal(following)
 	err = bson.Unmarshal(bsonBytes, &fusrodah)
 	if err != nil {
+		f.logger.Logger.Errorf("error while unmarshaling, %v\n", err)
 		return err
 	}
 
@@ -79,6 +84,7 @@ func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollo
 	if result.DeletedCount==1{
 		return nil
 	}else{
+		f.logger.Logger.Errorf("eno followings deleted, %v\n", err)
 		err1 := errors.New("deleting error: no followings deleted")
 		return err1
 	}
@@ -92,12 +98,14 @@ func (f followingRepo) GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, err
 	filterCursor, err := f.collection.Find(ctx, bson.M{"user": user})
 
 	if err != nil {
-		log.Fatal(err)
+		f.logger.Logger.Errorf("error while finding, %v\n", err)
+		//log.Fatal(err)
 		return nil, err
 	}
 	var usersFollowingBson []bson.M
 	if err = filterCursor.All(ctx, &usersFollowingBson); err != nil {
-		log.Fatal(err)
+		f.logger.Logger.Errorf("error while decoding all, %v\n", err)
+		//log.Fatal(err)
 		return nil, err
 	}
 
@@ -111,6 +119,7 @@ func (f followingRepo) CreateFollowing(following *domain.ProfileFollowing) (*dom
 	_, err := f.collection.InsertOne(ctx, *following)
 
 	if err != nil {
+		f.logger.Logger.Errorf("error while inserting following, %v\n", err)
 		panic(err)
 	}
 	return following, nil
@@ -131,6 +140,7 @@ func (f followingRepo) Delete(ctx context.Context, id string) *mongo.DeleteResul
 	if result.DeletedCount==0{
 		objID, err := primitive.ObjectIDFromHex(id)
 		if err!=nil{
+			f.logger.Logger.Errorf("error while deleting, %v\n", err)
 			return result
 		}
 		result, err = f.collection.DeleteOne(ctx, bson.M{"_id" :objID})
@@ -138,14 +148,16 @@ func (f followingRepo) Delete(ctx context.Context, id string) *mongo.DeleteResul
 	}
 
 	if err != nil {
+		f.logger.Logger.Errorf("error while deleting, %v\n", err)
 		log.Fatal("DeleteOne() ERROR:", err)
 	}
 
 	return result
 }
-func NewFollowingRepo(db *mongo.Client) FollowingRepo {
+func NewFollowingRepo(db *mongo.Client, logger *logger.Logger) FollowingRepo {
 	return &followingRepo{
 		db: db,
 		collection : db.Database("follow_db").Collection("profile_followings"),
+		logger: logger,
 	}
 }
