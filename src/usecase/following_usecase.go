@@ -6,6 +6,7 @@ import (
 	"FollowService/gateway"
 	"FollowService/repository"
 	"context"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -27,9 +28,12 @@ type followingUseCase struct {
 	//ProfileRepo          repository.ProfileRepo
 	FollowRequestUseCase FollowRequestUseCase
 	FollowerUseCase FollowerUseCase
+	logger *logger.Logger
 }
 
 func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error) {
+	f.logger.Logger.Infof("getting user followings for fronend")
+
 	following, _ := f.GetAllUsersFollowings(dto.ProfileDTO{ID: userId})
 	var retVal []dto.FollowingDTO
 	for _, follow := range following {
@@ -40,23 +44,31 @@ func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, user
 }
 
 func (f followingUseCase) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool {
+	f.logger.Logger.Infof("checking if already following")
 	return f.FollowingRepo.AlreadyFollowing(ctx, following)
 
 }
 
 func (f followingUseCase) Unfollow(ctx  context.Context, unfollow dto.Unfollow) error {
+	f.logger.Logger.Infof("unfolloing user %v\n", unfollow.UserToUnfollow)
+
 	if err := f.FollowingRepo.RemoveFollowing(ctx, unfollow);err !=nil{
+		f.logger.Logger.Errorf("failed removing following, error: %v\n", err)
 		return err
 	}
 	if err := f.FollowerRepo.RemoveFollower(ctx,unfollow); err!=nil{
+		f.logger.Logger.Errorf("failed removing follower, error: %v\n", err)
 		return err
 	}
 	return nil
 }
 
 func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error) {
+	f.logger.Logger.Infof("getting all users following")
+
 	userFollowingBson, err := f.FollowingRepo.GetAllUsersFollowings(user)
 	if err!=nil{
+		f.logger.Logger.Errorf("failed getting all users following, error: %v\n", err)
 		return nil, err
 	}
 	var usersFollowings []*domain.Profile
@@ -67,6 +79,7 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 
 		err := bson.Unmarshal(bsonBytes, &following)
 		if err != nil {
+			f.logger.Logger.Errorf("failed to unmarshal: %v\n", err)
 			return nil, err
 		}
 
@@ -76,13 +89,12 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 }
 
 func (f *followingUseCase) CreateFollowing(ctx context.Context, following *domain.ProfileFollowing) (*domain.ProfileFollowing, error) {
-
+	f.logger.Logger.Infof("creating following for user %v\n", following.ID)
 
 
 	isPrivate, err := gateway.IsProfilePrivate(ctx, following.Following.ID)
-
-
 	if err != nil {
+		f.logger.Logger.Errorf("is profile private error, : %v\n", err)
 		return nil, err
 	}
 
@@ -90,11 +102,13 @@ func (f *followingUseCase) CreateFollowing(ctx context.Context, following *domai
 	if !isPrivate{
 		newfollowing, err := f.FollowingRepo.CreateFollowing(following)
 		if err != nil{
+			f.logger.Logger.Errorf("create following error: %v\n", err)
 			return nil, err
 		}
 		newfollower := domain.ProfileFollower{Follower: following.User, User:following.Following, Timestamp: time.Now()}
 		_, err = f.FollowerUseCase.CreateFollower(&newfollower)
 		if err!=nil{
+			f.logger.Logger.Errorf("create follower error: %v\n", err)
 			return nil, err
 		}
 		return newfollowing, nil
@@ -110,10 +124,12 @@ func (f *followingUseCase) CreateFollowing(ctx context.Context, following *domai
 }
 
 func (f followingUseCase) GetByID(id string) *mongo.SingleResult {
+	f.logger.Logger.Infof("getting following by id %v\n", id)
 	return f.FollowingRepo.GetByID(id)
 }
 
 func (f followingUseCase) Delete(ctx context.Context, id string) *mongo.DeleteResult {
+	f.logger.Logger.Infof("deleting following by id %v\n", id)
 	//if f.FollowerUseCase.Delete(id).DeletedCount==1{
 		return f.FollowingRepo.Delete(ctx, id)
 	//}else{
@@ -126,12 +142,14 @@ func NewFollowingUseCase(followingRepo repository.FollowingRepo,
 						//profileRepo repository.ProfileRepo,
 						followReqUseCase FollowRequestUseCase,
 						followerUseCase FollowerUseCase,
-						followerRepo repository.FollowerRepo,) FollowingUseCase {
+						followerRepo repository.FollowerRepo,
+						logger *logger.Logger) FollowingUseCase {
 	return &followingUseCase{
 		FollowingRepo: followingRepo,
 		FollowerRepo:  followerRepo,
 		//ProfileRepo:           profileRepo,
 		FollowRequestUseCase : followReqUseCase,
 		FollowerUseCase: followerUseCase,
+		logger: logger,
 	}
 }

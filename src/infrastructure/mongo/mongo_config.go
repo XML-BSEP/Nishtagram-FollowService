@@ -14,7 +14,7 @@ import (
 )
 
 func init_viper() {
-	viper.SetConfigFile(`src/configurations/mongo.json`)
+	viper.SetConfigFile(`configurations/mongo.json`)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)

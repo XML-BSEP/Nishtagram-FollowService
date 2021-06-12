@@ -1,0 +1,8 @@
+{"data":{},"file":"following_handler.go:115","func":"FollowService/http/handler.followingHandler.GetAllUsersFollowings","level":"info","msg":"Handling GETTING ALL USERS FOLLOWINGS","time":"2021-06-12 05:37:56"}
+{"data":{},"file":"following_usecase.go:67","func":"FollowService/usecase.followingUseCase.GetAllUsersFollowings","level":"info","msg":"getting all users following","time":"2021-06-12 05:37:56"}
+{"data":{},"file":"follower_handler.go:46","func":"FollowService/http/handler.followerHandler.GetAllUsersFollowers","level":"info","msg":"Handling GET ALL USERS FOLLOWERS","time":"2021-06-12 05:38:34"}
+{"data":{},"file":"follower_usecase.go:43","func":"FollowService/usecase.followerUseCase.GetAllUsersFollowers","level":"info","msg":"getting all users followers","time":"2021-06-12 05:38:34"}
+{"data":{},"file":"following_handler.go:48","func":"FollowService/http/handler.(*followingHandler).IsAllowedToFollow","level":"info","msg":"Handling IS ALLOW TO FOLLOW ","time":"2021-06-12 05:39:11"}
+{"data":{},"file":"following_handler.go:60","func":"FollowService/http/handler.(*followingHandler).IsAllowedToFollow","level":"error","msg":"same user follow error","time":"2021-06-12 05:39:11"}
+{"data":{},"file":"following_handler.go:48","func":"FollowService/http/handler.(*followingHandler).IsAllowedToFollow","level":"info","msg":"Handling IS ALLOW TO FOLLOW ","time":"2021-06-12 05:41:39"}
+{"data":{},"file":"following_handler.go:60","func":"FollowService/http/handler.(*followingHandler).IsAllowedToFollow","level":"error","msg":"same user follow error","time":"2021-06-12 05:41:39"}
