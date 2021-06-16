@@ -18,9 +18,12 @@ type FollowerRepo interface {
 	GetByID(id string) *mongo.SingleResult
 	Delete(id string) *mongo.DeleteResult
 	GetAllUsersFollowers(user dto.ProfileDTO) ([]bson.M, error)
-	RemoveFollower(ctx context.Context, unfollow dto.Unfollow) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error)
-
+	RemoveFollower(ctx context.Context, userToUnfollow string, userUnfollowing string) error
+	GetFollowerByFollowerAndUser(ctx context.Context, follower string, user string) (*domain.ProfileFollower, error)
+	UpdateCloseFriendStatus(ctx context.Context, profileFollowerId string, status bool) error
+	GetAllUsersCloseFriends(ctx context.Context, userId string) ([]bson.M, error)
+	GetAllUsersToWhomUserIsCloseFriend(ctx context.Context, userId string) ([]bson.M, error)
 }
 
 type followerRepo struct {
@@ -29,37 +32,93 @@ type followerRepo struct {
 	logger *logger.Logger
 }
 
-func (f *followerRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+func (f *followerRepo) GetAllUsersCloseFriends(ctx context.Context, userId string) ([]bson.M, error) {
+	userBson := bson.M{"_id" : userId}
 
-	/*userBson := bson.M{"_id" : following.User}
-	followingBson := bson.M{"_id" : following.Following}*/
-
-	var val *domain.ProfileFollowing
-	err := f.collection.FindOne(ctx, bson.M{"user._id" : following.User.ID, "following._id" : following.Following.ID}).Decode(&val)
+	filterCursor, err := f.collection.Find(ctx, bson.M{"user": userBson, "close_friend":true})
 
 	if err != nil {
-		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
-		return false, err
+		f.logger.Logger.Errorf("error while finding all users , %v\n", err)
+		//log.Fatal(err)
+		return nil, err
 	}
-
-	return true, err
+	var usersFollowersBson []bson.M
+	if err = filterCursor.All(ctx, &usersFollowersBson); err != nil {
+		f.logger.Logger.Errorf("error while decoding all, %v\n", err)
+		//log.Fatal(err)
+		return nil, err
+	}
+	return usersFollowersBson, nil
 }
 
-func (f *followerRepo) RemoveFollower(ctx context.Context, unfollow dto.Unfollow) error {
+
+func (f *followerRepo) GetAllUsersToWhomUserIsCloseFriend(ctx context.Context, userId string) ([]bson.M, error) {
+	followerBson := bson.M{"_id" : userId}
+
+	filterCursor, err := f.collection.Find(ctx, bson.M{"follower": followerBson, "close_friend":true})
+
+	if err != nil {
+		f.logger.Logger.Errorf("error while finding all users , %v\n", err)
+		//log.Fatal(err)
+		return nil, err
+	}
+	var usersFollowersBson []bson.M
+	if err = filterCursor.All(ctx, &usersFollowersBson); err != nil {
+		f.logger.Logger.Errorf("error while decoding all, %v\n", err)
+		//log.Fatal(err)
+		return nil, err
+	}
+	return usersFollowersBson, nil
+}
+
+func (f *followerRepo) UpdateCloseFriendStatus(ctx context.Context, profileFollowerId string,status bool) error {
+
+	profileFollowerToUpdate := bson.M{"_id" : profileFollowerId}
+	updatedProfileFollower := bson.M{"$set": bson.M{
+		"close_friend":      status,
+
+	}}
+
+
+	_, err := f.collection.UpdateOne(ctx, profileFollowerToUpdate, updatedProfileFollower)
+	if err != nil {
+		f.logger.Logger.Errorf("error while updating profile follower with id %v\n", profileFollowerId)
+		return  err
+	}
+	return nil
+}
+
+func (f *followerRepo) GetFollowerByFollowerAndUser(ctx context.Context, follower string, user string) (*domain.ProfileFollower, error) {
+	var fBson bson.M
+	followerBson := bson.M{"_id" : follower}
+
+	userBson := bson.M{"_id" : user}
+
+	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "follower":followerBson}).Decode(&fBson)
+	if err !=nil{
+		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
+		log.Fatal(err)
+		return nil, err
+	}
+
+	var fusrodah domain.ProfileFollower
+
+	bsonBytes, _ := bson.Marshal(fBson)
+	err = bson.Unmarshal(bsonBytes, &fusrodah)
+	if err != nil {
+		f.logger.Logger.Errorf("unmarshal error, %v\n", err)
+		return nil, err
+	}
+	return &fusrodah, nil
+}
+
+func (f *followerRepo) RemoveFollower(ctx context.Context, userToUnfollow string, userUnfollowing string) error {
 	var follower bson.M
-	//fmt.Println(unfollow)
-	unfollowerBson := bson.M{"_id" :unfollow.UserUnfollowing}
-	// ja pratim peru i hocu peru da otpratim
-	// u ovom slucaju ja sam userUnfollowing, a pera je UserToUnfollow
+	unfollowerBson := bson.M{"_id" : userUnfollowing}
+	
+	userBson := bson.M{"_id" : userToUnfollow}
 
-	//sto znaci da ja trebam da budem obrisan iz tabele kao follower
-	//a pera kao user
-
-	userBson := bson.M{"_id" : unfollow.UserToUnfollow}
-
-	err := f.collection.FindOne(ctx, bson.M{"user": unfollowerBson, "follower":userBson}).Decode(&follower)
+	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "follower":unfollowerBson}).Decode(&follower)
 
 	if err !=nil{
 		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
@@ -84,8 +143,26 @@ func (f *followerRepo) RemoveFollower(ctx context.Context, unfollow dto.Unfollow
 		err1 := errors.New("deleting error: no followers deleted")
 		return err1
 	}
-
 }
+
+func (f *followerRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	/*userBson := bson.M{"_id" : following.User}
+	followingBson := bson.M{"_id" : following.Following}*/
+
+	var val *domain.ProfileFollowing
+	err := f.collection.FindOne(ctx, bson.M{"user._id" : following.User.ID, "following._id" : following.Following.ID}).Decode(&val)
+
+	if err != nil {
+		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
+		return false, err
+	}
+
+	return true, err
+}
+
 func (f *followerRepo) CreateFollower(follower *domain.ProfileFollower) (*domain.ProfileFollower, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

@@ -13,6 +13,8 @@ import (
 
 type FollowingHandler interface {
 	Unfollow(ctx *gin.Context)
+	//Unfollow1(ctx *gin.Context)
+
 	GetAllUsersFollowings(ctx *gin.Context)
 	Follow(ctx *gin.Context)
 	IsAllowedToFollow(ctx *gin.Context)
@@ -133,9 +135,33 @@ func (f followingHandler) GetAllUsersFollowings(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": followers})
 	return
 }
+//
+//func (f followingHandler) Unfollow(ctx *gin.Context) {
+//	f.logger.Logger.Println("Handling UNFOLLOW")
+//
+//	decoder := json.NewDecoder(ctx.Request.Body)
+//
+//	var t dto.Unfollow1
+//	decode_err := decoder.Decode(&t)
+//
+//	if decode_err!=nil{
+//		f.logger.Logger.Errorf("decoder error, error: %v\n", decode_err)
+//		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+//		return
+//	}
+//
+//	err := f.FollowingUseCase.Unfollow(ctx,t)
+//	if err!= nil{
+//		f.logger.Logger.Errorf("unfollow error, error: %v\n", err)
+//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//		return
+//	}
+//	ctx.JSON(http.StatusOK, gin.H{})
+//	return
+//}
 
 func (f followingHandler) Unfollow(ctx *gin.Context) {
-	f.logger.Logger.Println("Handling FOLLOW")
+	f.logger.Logger.Println("Handling UNFOLLOW")
 
 	decoder := json.NewDecoder(ctx.Request.Body)
 
@@ -148,7 +174,7 @@ func (f followingHandler) Unfollow(ctx *gin.Context) {
 		return
 	}
 
-	err := f.FollowingUseCase.Unfollow(ctx,t)
+	err := f.FollowingUseCase.Unfollow(ctx,t.UserToUnfollow, t.UserUnfollowing)
 	if err!= nil{
 		f.logger.Logger.Errorf("unfollow error, error: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -157,7 +183,6 @@ func (f followingHandler) Unfollow(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{})
 	return
 }
-
 func NewFollowingHandler(u usecase.FollowingUseCase, f usecase.FollowRequestUseCase, logger *logger.Logger) FollowingHandler {
 	return &followingHandler{u, f, logger}
 }

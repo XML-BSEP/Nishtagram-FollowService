@@ -99,15 +99,14 @@ func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.C
 		bson.D{
 			{"_id", "1231"},
 			{"Timestamp" , time.Now()},
-			{"user_requested", profil2},
-			{"followed_account", profil5},
+			{"user_requested", profil5},
+			{"followed_account", profil2},
 		},
-
 		bson.D{
 			{"_id", "1232"},
 			{"Timestamp" , time.Now()},
-			{"user_requested", profil3},
-			{"followed_account", profil4},
+			{"user_requested", profil6},
+			{"followed_account", profil2},
 		},
 		bson.D{
 			{"_id", "1233"},
@@ -115,12 +114,18 @@ func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.C
 			{"user_requested", profil4},
 			{"followed_account", profil3},
 		},
-		bson.D{
-			{"_id", "1234"},
-			{"Timestamp" , time.Now()},
-			{"user_requested", profil6},
-			{"followed_account", profil2},
-		},
+		//bson.D{
+		//	{"_id", "1233"},
+		//	{"Timestamp" , time.Now()},
+		//	{"user_requested", profil4},
+		//	{"followed_account", profil3},
+		//},
+		//bson.D{
+		//	{"_id", "1234"},
+		//	{"Timestamp" , time.Now()},
+		//	{"user_requested", profil6},
+		//	{"followed_account", profil2},
+		//},
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -128,6 +133,7 @@ func seedFollowRequest(followRequestCollection *mongo.Collection, ctx *context.C
 }
 
 func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *context.Context){
+
 	profil1 := domain.Profile{ID: "e2b5f92e-c31b-11eb-8529-0242ac130003"}
 	profil2 := domain.Profile{ID: "424935b1-766c-4f99-b306-9263731518bc"}
 	profil3 := domain.Profile{ID: "a2c2f993-dc32-4a82-82ed-a5f6866f7d03"}
@@ -135,6 +141,7 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 	profil5 := domain.Profile{ID: "ead67925-e71c-43f4-8739-c3b823fe21bb"}
 	profil6 := domain.Profile{ID: "23ddb1dd-4303-428b-b506-ff313071d5d7"}
 
+	//kec prati dvojku trojku cetvorku peticu sesticu :D
 	_, err := profileFollowingCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "12341"},
@@ -166,6 +173,8 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"user", profil1},
 			{"following", profil6},
 		},
+
+
 		bson.D{
 			{"_id", "12346"},
 			{"timestamp" , time.Now()},
@@ -184,6 +193,8 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"user", profil2},
 			{"following", profil4},
 		},
+
+
 		bson.D{
 			{"_id", "12349"},
 			{"timestamp" , time.Now()},
@@ -202,6 +213,8 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"user", profil3},
 			{"following", profil6},
 		},
+
+
 		bson.D{
 			{"_id", "12352"},
 			{"timestamp" , time.Now()},
@@ -220,6 +233,7 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"user", profil4},
 			{"following", profil6},
 		},
+
 
 		bson.D{
 			{"_id", "12355"},
@@ -251,6 +265,7 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"user", profil5},
 			{"following", profil6},
 		},
+
 
 		bson.D{
 			{"_id", "12360"},
@@ -285,6 +300,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 	profil5 := domain.Profile{ID: "ead67925-e71c-43f4-8739-c3b823fe21bb"}
 	profil6 := domain.Profile{ID: "23ddb1dd-4303-428b-b506-ff313071d5d7"}
 
+	//jedinica ima pratioce 2 3 4 5 6
 	_, err := followersCollection.InsertMany(*ctx, []interface{}{
 		bson.D{
 			{"_id", "1234561"},
@@ -318,6 +334,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"follower", profil6},
 		},
 
+
 		bson.D{
 			{"_id", "1234566"},
 			{"close_friend",false},
@@ -337,6 +354,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"user", profil2},
 			{"follower", profil5},
 		},
+
 
 		bson.D{
 			{"_id", "1234570"},
@@ -364,6 +382,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"follower", profil6},
 		},
 
+
 		bson.D{
 			{"_id", "1234574"},
 			{"close_friend",false},
@@ -390,6 +409,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"follower", profil6},
 		},
 
+
 		bson.D{
 			{"_id", "1234578"},
 			{"close_friend", false},
@@ -404,6 +424,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"user", profil5},
 			{"follower", profil3},
 		},
+
 
 		bson.D{
 			{"_id", "1234583"},
