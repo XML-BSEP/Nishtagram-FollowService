@@ -17,7 +17,7 @@ type FollowingUseCase interface {
 	GetByID(id string) *mongo.SingleResult
 	Delete(ctx context.Context,id string) *mongo.DeleteResult
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error)
-	Unfollow(ctx context.Context, unfollow dto.Unfollow) error
+	Unfollow(ctx context.Context, userToUnfollow string, userUnfollowing string) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
 	GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error)
 }
@@ -31,6 +31,19 @@ type followingUseCase struct {
 	logger *logger.Logger
 }
 
+func (f followingUseCase) Unfollow(ctx context.Context, userToUnfollow string, userUnfollowing string) error {
+	f.logger.Logger.Infof("user unfollowing %v unfollowing user %v\n",userUnfollowing ,userToUnfollow)
+
+	if err := f.FollowingRepo.RemoveFollowing(ctx, userToUnfollow, userUnfollowing);err !=nil{
+		f.logger.Logger.Errorf("failed removing following, error: %v\n", err)
+		return err
+	}
+	if err := f.FollowerRepo.RemoveFollower(ctx, userToUnfollow, userUnfollowing); err!=nil{
+		f.logger.Logger.Errorf("failed removing follower, error: %v\n", err)
+		return err
+	}
+	return nil}
+
 func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error) {
 	f.logger.Logger.Infof("getting user followings for fronend")
 
@@ -38,7 +51,7 @@ func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, user
 	var retVal []dto.FollowingDTO
 	for _, follow := range following {
 		profile, _ := gateway.GetUser(context.Background(), follow.ID)
-		retVal = append(retVal, dto.FollowingDTO{Id: userId, ProfilePhoto: profile.ProfilePhoto, Username: profile.Username})
+		retVal = append(retVal, dto.FollowingDTO{Id: follow.ID, ProfilePhoto: profile.ProfilePhoto, Username: profile.Username})
 	}
 	return retVal, nil
 }
@@ -49,19 +62,6 @@ func (f followingUseCase) AlreadyFollowing(ctx context.Context, following *domai
 
 }
 
-func (f followingUseCase) Unfollow(ctx  context.Context, unfollow dto.Unfollow) error {
-	f.logger.Logger.Infof("unfolloing user %v\n", unfollow.UserToUnfollow)
-
-	if err := f.FollowingRepo.RemoveFollowing(ctx, unfollow);err !=nil{
-		f.logger.Logger.Errorf("failed removing following, error: %v\n", err)
-		return err
-	}
-	if err := f.FollowerRepo.RemoveFollower(ctx,unfollow); err!=nil{
-		f.logger.Logger.Errorf("failed removing follower, error: %v\n", err)
-		return err
-	}
-	return nil
-}
 
 func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error) {
 	f.logger.Logger.Infof("getting all users following")

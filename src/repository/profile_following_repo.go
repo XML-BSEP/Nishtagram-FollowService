@@ -5,7 +5,6 @@ import (
 	"FollowService/dto"
 	"context"
 	"errors"
-	"fmt"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,7 +18,7 @@ type FollowingRepo interface {
 	GetByID(id string) *mongo.SingleResult
 	Delete(ctx context.Context, id string) *mongo.DeleteResult
 	GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, error)
-	RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error
+	RemoveFollowing(ctx context.Context, userToUnfollow string, userUnfollowing string) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
 	ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error
 }
@@ -30,38 +29,12 @@ type followingRepo struct {
 	logger *logger.Logger
 }
 
-func (f *followingRepo) ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	var val *domain.ProfileFollowing
-	return f.collection.FindOne(ctx, bson.M{"user._id": following.User.ID, "following._id": following.Following.ID}).Decode(&val)
-}
-
-func (f *followingRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool {
-	err := f.ExistsProfileIds(ctx, following)
-
-	if err != nil {
-		f.logger.Logger.Errorf("existing in profile error %v\n", err)
-		return false
-	}
-
-	return true
-}
-
-func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollow) error {
+func (f *followingRepo) RemoveFollowing(ctx context.Context, userToUnfollow string, userUnfollowing string) error {
 	var following bson.M
-	fmt.Println(unfollow)
-	followingBson := bson.M{"_id" :unfollow.UserUnfollowing}
 
-	userBson := bson.M{"_id" : unfollow.UserToUnfollow}
+	followingBson := bson.M{"_id" :userToUnfollow}
 
-	// ja pratim peru i hocu peru da otpratim
-	// u ovom slucaju ja sam userUnfollowing, a pera je UserToUnfollow
-
-	//sto znaci da ja trebam da budem obrisan iz tabele kao follower
-	//a pera kao user
-
+	userBson := bson.M{"_id" : userUnfollowing}
 
 	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "following":followingBson}).Decode(&following)
 	if err !=nil{
@@ -87,9 +60,27 @@ func (f followingRepo) RemoveFollowing(ctx context.Context, unfollow dto.Unfollo
 		f.logger.Logger.Errorf("eno followings deleted, %v\n", err)
 		err1 := errors.New("deleting error: no followings deleted")
 		return err1
+	}}
+
+func (f *followingRepo) ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var val *domain.ProfileFollowing
+	return f.collection.FindOne(ctx, bson.M{"user._id": following.User.ID, "following._id": following.Following.ID}).Decode(&val)
+}
+
+func (f *followingRepo) AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool {
+	err := f.ExistsProfileIds(ctx, following)
+
+	if err != nil {
+		f.logger.Logger.Errorf("existing in profile error %v\n", err)
+		return false
 	}
 
+	return true
 }
+
 
 func (f followingRepo) GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

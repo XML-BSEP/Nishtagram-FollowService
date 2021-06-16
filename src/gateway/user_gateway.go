@@ -16,7 +16,7 @@ func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 		SetBody(gin.H{"id" : userId}).
 		SetContext(ctx).
 		EnableTrace().
-		Post("https://localhost:8082/isPrivate")
+		Post("https://127.0.0.1:8082/isPrivate")
 
 	if err != nil {
 		return false, err
