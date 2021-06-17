@@ -7,16 +7,20 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	resty2 "github.com/go-resty/resty/v2"
+	"os"
 )
 
 func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 	client := resty2.New()
-
+	domain := os.Getenv("USER_DOMAIN")
+	if domain == "" {
+		domain = "127.0.0.1"
+	}
 	resp, err := client.R().
 		SetBody(gin.H{"id" : userId}).
 		SetContext(ctx).
 		EnableTrace().
-		Post("https://localhost:8082/isPrivate")
+		Post("https://" + domain + ":8082/isPrivate")
 
 	if err != nil {
 		return false, err
@@ -37,9 +41,15 @@ func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 
 func GetUser(ctx context.Context, userId string) (dto.ProfileUsernameImageDTO, error) {
 	client := resty2.New()
+	domain := os.Getenv("USER_DOMAIN")
+	if domain == "" {
+		domain = "127.0.0.1"
+	}
+
+
 	resp, _ := client.R().
 		EnableTrace().
-		Get("https://127.0.0.1:8082/getProfileUsernameImageById?userId=" + userId)
+		Get("https://" + domain + ":8082/getProfileUsernameImageById?userId=" + userId)
 
 	var responseDTO dto.ProfileUsernameImageDTO
 	err := json.Unmarshal(resp.Body(), &responseDTO)
