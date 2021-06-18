@@ -1,5 +1,5 @@
 {
-  "docker" : false,
+  "docker" : true,
   "mongodb_uri_docker" : "mongodb://mongofollow:27017",
   "mongodb_uri_localhost" : "mongodb://127.0.0.1:27017",
   "server" : {
