@@ -7,6 +7,7 @@ import (
 	"FollowService/interactor"
 	"context"
 	logger "github.com/jelena-vlajkov/logger/logger"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,5 +29,16 @@ func main() {
 	g.Use(gin.Recovery())
 
 	//g.Run(":8089")
-	g.RunTLS(":8089", "certificate/cert.pem", "certificate/key.pem")
+	if os.Getenv("DOCKER_ENV") == "" {
+		err := g.RunTLS(":8089", "certificate/cert.pem", "certificate/key.pem")
+		if err != nil {
+			return 
+		}
+		
+	} else {
+		err := g.Run(":8089")
+		if err != nil {
+			return 
+		}
+	}
 }
