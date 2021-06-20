@@ -2,12 +2,17 @@ package interactor
 
 import (
 	"FollowService/http/handler"
+	"FollowService/infrastructure/grpc/follow_service/implementation"
 	"FollowService/repository"
 	"FollowService/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 type interactor struct {
 	db *mongo.Client
+}
+
+func (i *interactor) NewFollowServiceImpl() *implementation.FollowServiceImpl {
+	return implementation.NewFollowServiceImpl(i.NewFollowingUseCase())
 }
 
 func (i *interactor) NewRequestRepository() repository.FollowRequestRepo {
@@ -83,6 +88,7 @@ type Interactor interface {
 
 	NewAppHandler() AppHandler
 
+	NewFollowServiceImpl() *implementation.FollowServiceImpl
 }
 
 type appHandler struct {
