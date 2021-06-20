@@ -2,14 +2,18 @@ module FollowService
 
 go 1.16
 
+replace github.com/jelena-vlajkov/logger/logger => ../../Nishtagram-Logger/
+
 require (
-	github.com/gin-contrib/cors v1.3.1 // indirect
-	github.com/gin-contrib/static v0.0.1 // indirect
+	github.com/casbin/casbin/v2 v2.31.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/secure v0.0.1
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
-	github.com/go-resty/resty/v2 v2.6.0 // indirect
+	github.com/go-resty/resty/v2 v2.6.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
+	github.com/jelena-vlajkov/logger/logger v1.0.0
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect

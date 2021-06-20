@@ -7,14 +7,14 @@ import (
 	"FollowService/infrastructure/seeder"
 	"FollowService/interactor"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-
-	"github.com/gin-gonic/gin"
+	"context"
+	"os"
 )
-
-
 func getNetListener(port uint) net.Listener {
 	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
@@ -25,12 +25,14 @@ func getNetListener(port uint) net.Listener {
 }
 
 func main() {
+	logger := logger.InitializeLogger("follow-service", context.Background())
+
 	mongoCli, ctx := mongo.NewMongoClient()
 	db := mongo.GetDbName()
 
 	seeder.SeedData(db, mongoCli, ctx)
 
-	i := interactor.NewInteractor(mongoCli)
+	i := interactor.NewInteractor(mongoCli, logger)
 	appHandler := i.NewAppHandler()
 
 	g := router.NewRouter(appHandler)
@@ -45,6 +47,20 @@ func main() {
 	go func() {
 		log.Fatalln(grpcServer.Serve(list))
 	}()
-	g.Run("127.0.0.1:8089")
 
+	//g.Run(":8089")
+	if os.Getenv("DOCKER_ENV") == "" {
+		err := g.RunTLS(":8089", "certificate/cert.pem", "certificate/key.pem")
+		if err != nil {
+			return 
+		}
+		
+	} else {
+		err := g.Run(":8089")
+		if err != nil {
+			return 
+		}
+	}
+
+	g.Run("127.0.0.1:8089")
 }
