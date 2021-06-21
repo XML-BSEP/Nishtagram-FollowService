@@ -6,17 +6,24 @@ import (
 	"FollowService/infrastructure/mongo"
 	"FollowService/infrastructure/seeder"
 	"FollowService/interactor"
-	"fmt"
+	"context"
 	"github.com/gin-gonic/gin"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"google.golang.org/grpc"
 	"log"
 	"net"
-	"context"
 	"os"
+	"strconv"
 )
 func getNetListener(port uint) net.Listener {
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	var domain string
+	if os.Getenv("DOCKER_ENV") == "" {
+		domain = "127.0.0.1"
+	} else {
+		domain = "followms"
+	}
+	domain = domain + ":" + strconv.Itoa(int(port))
+	lis, err := net.Listen("tcp", domain)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -48,7 +55,6 @@ func main() {
 		log.Fatalln(grpcServer.Serve(list))
 	}()
 
-	//g.Run(":8089")
 	if os.Getenv("DOCKER_ENV") == "" {
 		err := g.RunTLS(":8089", "certificate/cert.pem", "certificate/key.pem")
 		if err != nil {
@@ -62,5 +68,4 @@ func main() {
 		}
 	}
 
-	g.Run("127.0.0.1:8089")
 }

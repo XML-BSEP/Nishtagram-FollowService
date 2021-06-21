@@ -1,29 +1,3 @@
-# FROM golang:alpine
-
-# # Install git
-# RUN apk update && apk add --no-cache git
-
-# # Where our files will be in the docker container 
-
-# # Copy the source from the current directory to the working Directory inside the container 
-# # Source also contains go.mod and go.sum which are dependency files
-# WORKDIR /src
-
-# # Get Dependency
-# # COPY go.* .
-# # RUN go mod download
-
-
-# COPY . .
-
-# RUN go build -o main .
-
-# # Install Air for hot reload
-# RUN go get -u github.com/cosmtrek/air
-
-# # The ENTRYPOINT defines the command that will be ran when the container starts up
-# # In this case air command for hot reload go apps on file changes
-# ENTRYPOINT air
 
 FROM golang:latest as builder
 
@@ -51,6 +25,14 @@ WORKDIR /root/
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/configurations ./configurations
 COPY --from=builder /app/certificate ./certificate
+COPY --from=builder /app/http ./http
+COPY --from=builder /app/dto ./dto
+COPY --from=builder /app/domain ./domain
+COPY --from=builder /app/gateway ./gateway
+COPY --from=builder /app/infrastructure ./infrastructure
+COPY --from=builder /app/interactor ./interactor
+COPY --from=builder /app/usecase ./usecase
+COPY --from=builder /app/repository ./repository
 COPY --from=builder /app/main .
 # Command to run the executable
 CMD ["./main"]

@@ -2,7 +2,6 @@ package router
 
 import (
 	"FollowService/interactor"
-	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +24,6 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	router.Use(secure.New(secure.DefaultConfig()))
 
 
 	router.POST("/unfollow", handler.Unfollow)
