@@ -28,7 +28,7 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context){
 		seedProfileFollowers(followersCollection, ctx)
 	}
 
-	if cnt,_ := mongoCli.Database(db).Collection("follow_request").EstimatedDocumentCount(*ctx, nil); cnt == 0{
+	if cnt,_ := mongoCli.Database(db).Collection("follow_requests").EstimatedDocumentCount(*ctx, nil); cnt == 0{
 		followRequestCollection := mongoCli.Database(db).Collection("follow_requests")
 		seedFollowRequest(followRequestCollection, ctx)
 	}

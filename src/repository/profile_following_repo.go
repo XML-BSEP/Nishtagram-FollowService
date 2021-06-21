@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"time"
 )
 
@@ -140,7 +139,7 @@ func (f followingRepo) Delete(ctx context.Context, id string) *mongo.DeleteResul
 
 	if err != nil {
 		f.logger.Logger.Errorf("error while deleting, %v\n", err)
-		log.Fatal("DeleteOne() ERROR:", err)
+		//log.Fatal("DeleteOne() ERROR:", err)
 	}
 
 	return result
