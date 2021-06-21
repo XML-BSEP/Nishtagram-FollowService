@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"time"
 )
 
@@ -97,7 +96,6 @@ func (f *followerRepo) GetFollowerByFollowerAndUser(ctx context.Context, followe
 	err := f.collection.FindOne(ctx, bson.M{"user": userBson, "follower":followerBson}).Decode(&fBson)
 	if err !=nil{
 		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
-		log.Fatal(err)
 		return nil, err
 	}
 
@@ -122,7 +120,6 @@ func (f *followerRepo) RemoveFollower(ctx context.Context, userToUnfollow string
 
 	if err !=nil{
 		f.logger.Logger.Errorf("error while finding one and decoding, %v\n", err)
-		log.Fatal(err)
 		return err
 	}
 
