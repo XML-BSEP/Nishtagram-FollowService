@@ -5,6 +5,7 @@ import (
 	"FollowService/dto"
 	"FollowService/repository"
 	"context"
+	"fmt"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,7 +15,7 @@ import (
 type FollowRequestUseCase interface {
 	CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error)
 	GetByID(id string) *mongo.SingleResult
-	Delete(id string) (*mongo.DeleteResult, error)
+	Delete(id string, ctx context.Context) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.Profile, error)
 	ApprofeFollowRequest(ctx context.Context,req dto.FollowRequestDTO) error
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
@@ -36,11 +37,13 @@ func (f *followRequestUseCase) CancelFollowRequest(ctx context.Context, request 
 		f.logger.Logger.Errorf("failed cancel follow request, error: %v\n", err)
 		return err
 	}
-	if asd,_ := f.Delete(followReq.ID); asd.DeletedCount==1{
+	asd, _ := f.Delete(followReq.ID, ctx)
+	if asd.DeletedCount==1{
 		return  nil
 	}else{
-		return err
+		return fmt.Errorf("ERROR DELETING FOLLOW REQUEST")
 	}
+
 }
 
 func (f *followRequestUseCase) IsCreated(ctx context.Context, request *domain.FollowRequest) bool {
@@ -64,7 +67,7 @@ func (f followRequestUseCase) ApprofeFollowRequest(ctx context.Context, req dto.
 		f.logger.Logger.Errorf("failed to unmarshal, error: %v\n", err)
 		return err
 	}
-	_, del_err := f.Delete(requestDTO.ID)
+	_, del_err := f.Delete(requestDTO.ID, ctx)
 	if del_err!=nil{
 		f.logger.Logger.Errorf("failed to delete, error: %v\n", del_err)
 		return del_err
@@ -120,9 +123,9 @@ func (f followRequestUseCase) GetByID(id string) *mongo.SingleResult {
 	return f.FollowRequestRepo.GetByID(id)
 }
 
-func (f followRequestUseCase) Delete(id string) (*mongo.DeleteResult, error) {
+func (f followRequestUseCase) Delete(id string, ctx context.Context) (*mongo.DeleteResult, error) {
 	f.logger.Logger.Infof("delete by id %v\n", id)
-	return f.FollowRequestRepo.Delete(id)
+	return f.FollowRequestRepo.Delete(id,ctx)
 }
 
 func NewFollowRequestUseCase(repo repository.FollowRequestRepo, followerRepo repository.FollowerRepo, followingRepo repository.FollowingRepo, logger *logger.Logger) FollowRequestUseCase {

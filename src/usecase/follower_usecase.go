@@ -31,7 +31,7 @@ type followerUseCase struct {
 }
 
 func (f followerUseCase) IsUserFollowingUser(ctx context.Context, userFollowing string, userFollowed string) (bool, error) {
-	f.logger.Logger.Infof("adding to close friends")
+	f.logger.Logger.Infof("is user following user")
 	profile_follower, err := f.FollowerRepo.GetFollowerByFollowerAndUser(ctx, userFollowing, userFollowed)
 
 	if err !=nil{

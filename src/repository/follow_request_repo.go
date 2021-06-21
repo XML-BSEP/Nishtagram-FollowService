@@ -6,15 +6,15 @@ import (
 	"context"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"time"
 )
 
 type FollowRequestRepo interface {
 	CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error)
 	GetByID(id string) *mongo.SingleResult
-	Delete(id string) (*mongo.DeleteResult, error)
+	Delete(id string, ctx context.Context) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]bson.M, error)
 	GetFollowRequestByUserAndFollower(ctx context.Context, req dto.FollowRequestDTO) (bson.M, error)
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
@@ -88,13 +88,13 @@ func (f followRequestRepo) GetAllUsersFollowRequests(user  dto.ProfileDTO) ( []b
 
 	if err != nil {
 		f.logger.Logger.Errorf("error while finding, %v\n", err)
-		log.Fatal(err)
+		//log.Fatal(err)
 		return nil, err
 	}
 	var usersFollowRequestsBson []bson.M
 	if err = filterCursor.All(ctx, &usersFollowRequestsBson); err != nil {
 		f.logger.Logger.Errorf("error while decoding all users follow requests, %v\n", err)
-		log.Fatal(err)
+		//log.Fatal(err)
 		return nil, err
 	}
 
@@ -108,7 +108,7 @@ func (f followRequestRepo) CreateFollowRequest(req *domain.FollowRequest) (*doma
 
 	if err != nil {
 		f.logger.Logger.Errorf("inster one failed  %v\n", err)
-		panic(err)
+		//panic(err)
 	}
 	return req, nil
 }
@@ -121,14 +121,13 @@ func (f followRequestRepo) GetByID(id string) *mongo.SingleResult {
 	return result
 }
 
-func (f followRequestRepo) Delete(id string) (*mongo.DeleteResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+func (f followRequestRepo) Delete(id string, ctx context.Context) (*mongo.DeleteResult, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
 
-	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
+	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": oid})
 	if err != nil {
 		f.logger.Logger.Errorf("delete one failed, %v\n", err)
-		log.Fatal("DeleteOne() ERROR:", err)
+		//log.Fatal("DeleteOne() ERROR:", err)
 		return nil, err
 	}
 	return result, nil
