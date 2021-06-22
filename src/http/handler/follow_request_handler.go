@@ -2,6 +2,7 @@ package handler
 
 import (
 	"FollowService/dto"
+	"FollowService/gateway"
 	"FollowService/usecase"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -56,7 +57,12 @@ func (f followRequestHandler) GetAllUsersFollowRequests(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": requests})
+	var reqs []dto.FollowReqDTO
+	for _,it :=range requests{
+		profile, _ := gateway.GetUser(ctx, it.UserRequested.ID)
+		reqs = append(reqs, dto.FollowReqDTO{Id: it.ID, Username: profile.Username, ProfilePhoto: profile.ProfilePhoto, UserId: it.UserRequested.ID})
+	}
+	ctx.JSON(http.StatusOK, reqs)
 	return
 }
 
@@ -64,14 +70,16 @@ func (f followRequestHandler) ApproveRequest(ctx *gin.Context){
 	f.logger.Logger.Println("Handling APPROVE REQUEST")
 
 	decoder := json.NewDecoder(ctx.Request.Body)
-	var t dto.FollowRequestDTO
+	var t dto.FollowReqDTO
 	decode_err := decoder.Decode(&t)
 	if decode_err!=nil{
 		f.logger.Logger.Errorf("decoder error, error: %v\n", decode_err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
 		return
 	}
-	err := f.FollowRequestUseCase.ApprofeFollowRequest(ctx, t)
+	shit := dto.FollowRequestDTO{UserRequested: t.UserId, FollowedAccount: t.UserFollowedId}
+
+	err := f.FollowRequestUseCase.ApprofeFollowRequest(ctx, shit)
 	if err !=nil{
 		f.logger.Logger.Errorf("approve follow request error, error: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

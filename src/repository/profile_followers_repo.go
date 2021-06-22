@@ -7,7 +7,7 @@ import (
 	"errors"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	_ "go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
@@ -187,12 +187,12 @@ func (f followerRepo) Delete(id string) *mongo.DeleteResult {
 
 	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
 	if result.DeletedCount==0{
-		objID, err := primitive.ObjectIDFromHex(id)
+		//objID, err := primitive.ObjectIDFromHex(id)
 		if err!=nil{
 			f.logger.Logger.Errorf("delete error, %v\n", err)
 			return result
 		}
-		result, err = f.collection.DeleteOne(ctx, bson.M{"_id" :objID})
+		result, err = f.collection.DeleteOne(ctx, bson.M{"_id" :id})
 
 	}
 

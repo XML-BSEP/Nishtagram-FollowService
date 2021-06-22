@@ -14,10 +14,10 @@ import (
 
 type FollowRequestUseCase interface {
 	CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error)
-	GetByID(id string) *mongo.SingleResult
+	GetByID(ctx context.Context,id string) *mongo.SingleResult
 	Delete(id string, ctx context.Context) (*mongo.DeleteResult, error)
-	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.Profile, error)
-	ApprofeFollowRequest(ctx context.Context,req dto.FollowRequestDTO) error
+	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.FollowRequest, error)
+	ApprofeFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
 	CancelFollowRequest(ctx context.Context, request *dto.FollowRequestDTO) error
 }
@@ -53,6 +53,7 @@ func (f *followRequestUseCase) IsCreated(ctx context.Context, request *domain.Fo
 
 func (f followRequestUseCase) ApprofeFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error {
 	f.logger.Logger.Infof("approving follow request")
+
 	request, err := f.FollowRequestRepo.GetFollowRequestByUserAndFollower(ctx, req)
 	if err!=nil{
 		f.logger.Logger.Errorf("failed to get following request by user and follower, error: %v\n", err)
@@ -91,7 +92,7 @@ func (f followRequestUseCase) ApprofeFollowRequest(ctx context.Context, req dto.
 	return nil
 }
 
-func (f followRequestUseCase) GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.Profile, error) {
+func (f followRequestUseCase) GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.FollowRequest, error) {
 	f.logger.Logger.Infof("get all users follow request for user %v\n", user.ID)
 
 	userFollowRequestsBson, err := f.FollowRequestRepo.GetAllUsersFollowRequests(user)
@@ -99,16 +100,17 @@ func (f followRequestUseCase) GetAllUsersFollowRequests(user dto.ProfileDTO) ([]
 		f.logger.Logger.Errorf("failed to create following, error: %v\n", err)
 		return nil,err
 	}
-	var usersFollowRequests []*domain.Profile
-	var followRequest *domain.FollowRequest
+	var usersFollowRequests []*domain.FollowRequest
 	for _, uf := range userFollowRequestsBson {
+		var followRequest *domain.FollowRequest
+
 		bsonBytes, _ := bson.Marshal(uf)
 		err := bson.Unmarshal(bsonBytes, &followRequest)
 		if err != nil {
 			f.logger.Logger.Errorf("failed unmarshal, error: %v\n", err)
 			return nil, err
 		}
-		usersFollowRequests = append(usersFollowRequests, &followRequest.UserRequested)
+		usersFollowRequests = append(usersFollowRequests, followRequest)
 	}
 	return usersFollowRequests, nil
 }
@@ -118,9 +120,9 @@ func (f followRequestUseCase) CreateFollowRequest(req *domain.FollowRequest) (*d
 	return f.FollowRequestRepo.CreateFollowRequest(req)
 }
 
-func (f followRequestUseCase) GetByID(id string) *mongo.SingleResult {
+func (f followRequestUseCase) GetByID(ctx context.Context,id string) *mongo.SingleResult {
 	f.logger.Logger.Infof("getting by id %v\n", id)
-	return f.FollowRequestRepo.GetByID(id)
+	return f.FollowRequestRepo.GetByID(ctx,id)
 }
 
 func (f followRequestUseCase) Delete(id string, ctx context.Context) (*mongo.DeleteResult, error) {
