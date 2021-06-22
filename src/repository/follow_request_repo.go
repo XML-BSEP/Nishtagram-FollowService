@@ -13,7 +13,7 @@ import (
 
 type FollowRequestRepo interface {
 	CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error)
-	GetByID(id string) *mongo.SingleResult
+	GetByID(ctx context.Context,id string) *mongo.SingleResult
 	Delete(id string, ctx context.Context) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]bson.M, error)
 	GetFollowRequestByUserAndFollower(ctx context.Context, req dto.FollowRequestDTO) (bson.M, error)
@@ -113,11 +113,12 @@ func (f followRequestRepo) CreateFollowRequest(req *domain.FollowRequest) (*doma
 	return req, nil
 }
 
-func (f followRequestRepo) GetByID(id string) *mongo.SingleResult {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+func (f followRequestRepo) GetByID(ctx context.Context,id string) *mongo.SingleResult {
+	//ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	//defer cancel()
 
 	result :=f.collection.FindOne(ctx, bson.M{"_id": id})
+
 	return result
 }
 
