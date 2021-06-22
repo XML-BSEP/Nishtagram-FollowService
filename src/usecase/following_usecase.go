@@ -33,16 +33,20 @@ type followingUseCase struct {
 
 func (f followingUseCase) Unfollow(ctx context.Context, userToUnfollow string, userUnfollowing string) error {
 	f.logger.Logger.Infof("user unfollowing %v unfollowing user %v\n",userUnfollowing ,userToUnfollow)
-
-	if err := f.FollowingRepo.RemoveFollowing(ctx, userToUnfollow, userUnfollowing);err !=nil{
+	var err error
+	if err = f.FollowingRepo.RemoveFollowing(ctx, userToUnfollow, userUnfollowing);err !=nil{
 		f.logger.Logger.Errorf("failed removing following, error: %v\n", err)
-		return err
+
 	}
-	if err := f.FollowerRepo.RemoveFollower(ctx, userToUnfollow, userUnfollowing); err!=nil{
+	if err = f.FollowerRepo.RemoveFollower(ctx, userToUnfollow, userUnfollowing); err!=nil{
 		f.logger.Logger.Errorf("failed removing follower, error: %v\n", err)
+
+	}
+	if err!=nil{
 		return err
 	}
-	return nil}
+	return nil
+}
 
 func (f followingUseCase) GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error) {
 	f.logger.Logger.Infof("getting user followings for fronend")
