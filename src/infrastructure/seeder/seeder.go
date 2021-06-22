@@ -242,12 +242,6 @@ func seedProfileFollowing(profileFollowingCollection *mongo.Collection, ctx *con
 			{"following", profil1},
 		},
 		bson.D{
-			{"_id", "12356"},
-			{"timestamp" , time.Now()},
-			{"user", profil5},
-			{"following", profil2},
-		},
-		bson.D{
 			{"_id", "12357"},
 			{"timestamp" , time.Now()},
 			{"user", profil5},
@@ -347,14 +341,7 @@ func seedProfileFollowers(followersCollection *mongo.Collection, ctx *context.Co
 			{"timestamp" , time.Now()},
 			{"user", profil2},
 			{"follower", profil4},
-		},bson.D{
-			{"_id", "1234569"},
-			{"close_friend",true},
-			{"timestamp" , time.Now()},
-			{"user", profil2},
-			{"follower", profil5},
 		},
-
 
 		bson.D{
 			{"_id", "1234570"},

@@ -5,6 +5,7 @@ import (
 	"FollowService/dto"
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	_ "go.mongodb.org/mongo-driver/bson/primitive"
@@ -163,6 +164,8 @@ func (f *followerRepo) AlreadyFollowing(ctx context.Context, following *domain.P
 func (f *followerRepo) CreateFollower(follower *domain.ProfileFollower) (*domain.ProfileFollower, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	follower.ID = uuid.NewString()
 
 	_, err := f.collection.InsertOne(ctx, *follower)
 

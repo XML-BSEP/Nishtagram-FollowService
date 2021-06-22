@@ -14,11 +14,34 @@ type FollowRequestHandler interface {
 	GetAllUsersFollowRequests(ctx *gin.Context)
 	ApproveRequest(ctx *gin.Context)
 	CancelFollowRequest(ctx *gin.Context)
+	ApproveAllRequests(ctx *gin.Context)
 }
 type followRequestHandler struct {
 	FollowRequestUseCase usecase.FollowRequestUseCase
 	logger *logger.Logger
 }
+
+func (f followRequestHandler) ApproveAllRequests(ctx *gin.Context) {
+	f.logger.Logger.Println("Handling APPROVING ALL FOLLOW REQUEST")
+	decoder := json.NewDecoder(ctx.Request.Body)
+	var t dto.ProfileDTO
+	decode_err := decoder.Decode(&t)
+	if decode_err!=nil{
+		f.logger.Logger.Errorf("decoder error, error: %v\n", decode_err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+		return
+	}
+
+	err := f.FollowRequestUseCase.ApproveAllFollowRequest(ctx, t.ID)
+	if err !=nil{
+		f.logger.Logger.Errorf("approve follow request error, error: %v\n", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data":"success"})
+	return
+}
+
 func (f followRequestHandler) CancelFollowRequest(ctx *gin.Context){
 	f.logger.Logger.Println("Handling CANCELLATION FOLLOW REQUEST")
 
@@ -70,16 +93,15 @@ func (f followRequestHandler) ApproveRequest(ctx *gin.Context){
 	f.logger.Logger.Println("Handling APPROVE REQUEST")
 
 	decoder := json.NewDecoder(ctx.Request.Body)
-	var t dto.FollowReqDTO
+	var t dto.FollowRequestDTO
 	decode_err := decoder.Decode(&t)
 	if decode_err!=nil{
 		f.logger.Logger.Errorf("decoder error, error: %v\n", decode_err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
 		return
 	}
-	shit := dto.FollowRequestDTO{UserRequested: t.UserId, FollowedAccount: t.UserFollowedId}
 
-	err := f.FollowRequestUseCase.ApprofeFollowRequest(ctx, shit)
+	err := f.FollowRequestUseCase.ApproveFollowRequest(ctx, t)
 	if err !=nil{
 		f.logger.Logger.Errorf("approve follow request error, error: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

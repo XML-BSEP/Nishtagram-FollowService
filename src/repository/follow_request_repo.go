@@ -4,9 +4,9 @@ import (
 	"FollowService/domain"
 	"FollowService/dto"
 	"context"
+	"github.com/google/uuid"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
@@ -104,6 +104,7 @@ func (f followRequestRepo) GetAllUsersFollowRequests(user  dto.ProfileDTO) ( []b
 func (f followRequestRepo) CreateFollowRequest(req *domain.FollowRequest) (*domain.FollowRequest, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+	req.ID = uuid.NewString()
 	_, err := f.collection.InsertOne(ctx, *req)
 
 	if err != nil {
@@ -123,9 +124,9 @@ func (f followRequestRepo) GetByID(ctx context.Context,id string) *mongo.SingleR
 }
 
 func (f followRequestRepo) Delete(id string, ctx context.Context) (*mongo.DeleteResult, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
+	//oid, err := primitive.ObjectIDFromHex(id)
 
-	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": oid})
+	result, err := f.collection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		f.logger.Logger.Errorf("delete one failed, %v\n", err)
 		//log.Fatal("DeleteOne() ERROR:", err)
