@@ -5,6 +5,7 @@ import (
 	"FollowService/dto"
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -104,6 +105,7 @@ func (f followingRepo) GetAllUsersFollowings(user dto.ProfileDTO) ([]bson.M, err
 func (f followingRepo) CreateFollowing(following *domain.ProfileFollowing) (*domain.ProfileFollowing, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+	following.ID = uuid.NewString()
 
 	_, err := f.collection.InsertOne(ctx, *following)
 

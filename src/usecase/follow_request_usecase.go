@@ -17,9 +17,10 @@ type FollowRequestUseCase interface {
 	GetByID(ctx context.Context,id string) *mongo.SingleResult
 	Delete(id string, ctx context.Context) (*mongo.DeleteResult, error)
 	GetAllUsersFollowRequests(user dto.ProfileDTO) ([]*domain.FollowRequest, error)
-	ApprofeFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error
+	ApproveFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error
 	IsCreated(ctx context.Context, request *domain.FollowRequest) bool
 	CancelFollowRequest(ctx context.Context, request *dto.FollowRequestDTO) error
+	ApproveAllFollowRequest(ctx context.Context, id string) error
 }
 
 type followRequestUseCase struct {
@@ -29,6 +30,38 @@ type followRequestUseCase struct {
 	logger *logger.Logger
 
 }
+
+func (f *followRequestUseCase) ApproveAllFollowRequest(ctx context.Context, id string) error {
+	allFollowRequestsBson,err := f.FollowRequestRepo.GetAllUsersFollowRequests(dto.ProfileDTO{ID: id})
+	if err !=nil{
+		f.logger.Logger.Errorf("failed cancel follow request, error: %v\n", err)
+		return err
+	}
+	
+	var requests []*domain.FollowRequest
+	for _, uf := range allFollowRequestsBson {
+		bsonBytes, _ := bson.Marshal(uf)
+		var req *domain.FollowRequest
+
+		err1 := bson.Unmarshal(bsonBytes, &req)
+		if err1 != nil {
+			f.logger.Logger.Errorf("failed cancel follow request, error: %v\n", err)
+			return err
+		}
+		requests = append(requests, req)
+	}
+	
+	for _, it := range requests{
+		reqToApprove := dto.FollowRequestDTO{ID: it.ID, UserRequested: it.UserRequested.ID, FollowedAccount: it.FollowedAccount.ID}
+		err2 := f.ApproveFollowRequest(ctx, reqToApprove)
+		if err2 != nil {
+			return err2
+		}
+	}
+	
+	return nil
+}
+
 func (f *followRequestUseCase) CancelFollowRequest(ctx context.Context, request *dto.FollowRequestDTO) error {
 	f.logger.Logger.Infof("cancel follow request")
 
@@ -51,7 +84,7 @@ func (f *followRequestUseCase) IsCreated(ctx context.Context, request *domain.Fo
 	return f.FollowRequestRepo.IsCreated(ctx, request)
 }
 
-func (f followRequestUseCase) ApprofeFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error {
+func (f followRequestUseCase) ApproveFollowRequest(ctx context.Context, req dto.FollowRequestDTO) error {
 	f.logger.Logger.Infof("approving follow request")
 
 	request, err := f.FollowRequestRepo.GetFollowRequestByUserAndFollower(ctx, req)
