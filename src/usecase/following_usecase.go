@@ -16,11 +16,41 @@ type FollowingUseCase interface {
 	CreateFollowing(ctx context.Context, following *domain.ProfileFollowing) (*domain.ProfileFollowing, error)
 	GetByID(id string) *mongo.SingleResult
 	Delete(ctx context.Context,id string) *mongo.DeleteResult
-	GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error)
+	GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.ProfileFollowing, error)
 	Unfollow(ctx context.Context, userToUnfollow string, userUnfollowing string) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
 	GetUserFollowingsForFrontend(ctx context.Context, userId string) ([]dto.FollowingDTO, error)
+	BanUser(ctx context.Context, userId string)error
+
 }
+func (f followingUseCase) BanUser(ctx context.Context, userId string) error{
+	followers, err := f.FollowerUseCase.GetAllUsersFollowers(dto.ProfileDTO{ID: userId})
+	if err!=nil{
+		return err
+	}
+
+	followings, err1 := f.GetAllUsersFollowings(dto.ProfileDTO{ID: userId})
+	if err1!=nil{
+		return err1
+	}
+
+	for _, it :=range followers{
+		err2:=f.Unfollow(ctx, it.User.ID, it.Follower.ID)
+		if err2!=nil{
+			return err
+		}
+	}
+
+	for _, it :=range followings{
+		err3:=f.Unfollow(ctx, it.Following.ID, it.User.ID)
+		if err3!=nil{
+			return err
+		}
+	}
+
+	return nil
+}
+
 
 type followingUseCase struct {
 	FollowingRepo       repository.FollowingRepo
@@ -30,6 +60,7 @@ type followingUseCase struct {
 	FollowerUseCase FollowerUseCase
 	logger *logger.Logger
 }
+
 
 func (f followingUseCase) Unfollow(ctx context.Context, userToUnfollow string, userUnfollowing string) error {
 	f.logger.Logger.Infof("user unfollowing %v unfollowing user %v\n",userUnfollowing ,userToUnfollow)
@@ -67,7 +98,7 @@ func (f followingUseCase) AlreadyFollowing(ctx context.Context, following *domai
 }
 
 
-func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.Profile, error) {
+func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.ProfileFollowing, error) {
 	f.logger.Logger.Infof("getting all users following")
 
 	userFollowingBson, err := f.FollowingRepo.GetAllUsersFollowings(user)
@@ -75,7 +106,7 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 		f.logger.Logger.Errorf("failed getting all users following, error: %v\n", err)
 		return nil, err
 	}
-	var usersFollowings []*domain.Profile
+	var usersFollowings []*domain.ProfileFollowing
 
 	for _, uf := range userFollowingBson {
 		bsonBytes, _ := bson.Marshal(uf)
@@ -87,7 +118,7 @@ func (f followingUseCase) GetAllUsersFollowings(user dto.ProfileDTO) ([]*domain.
 			return nil, err
 		}
 
-		usersFollowings = append(usersFollowings, &following.Following)
+		usersFollowings = append(usersFollowings, following)
 	}
 	return usersFollowings, nil
 }

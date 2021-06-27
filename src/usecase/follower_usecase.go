@@ -16,6 +16,7 @@ type FollowerUseCase interface {
 	GetByID(id string) *mongo.SingleResult
 	Delete(id string) *mongo.DeleteResult
 	GetAllUsersFollowers(user dto.ProfileDTO) ([]*domain.ProfileFollower, error)
+
 	AlreadyFollowing (ctx context.Context, following *domain.ProfileFollowing) (bool, error)
 	GetFollowersForFront(ctx context.Context, userId string) ([]dto.FollowerDTO, error)
 	AddToCloseFriends(ctx context.Context, newCloseFriendId string, userId string) error
@@ -29,6 +30,8 @@ type followerUseCase struct {
 	FollowerRepo repository.FollowerRepo
 	logger *logger.Logger
 }
+
+
 
 func (f followerUseCase) IsUserFollowingUser(ctx context.Context, userFollowing string, userFollowed string) (bool, error) {
 	f.logger.Logger.Infof("is user following user")

@@ -20,6 +20,7 @@ type FollowingRepo interface {
 	RemoveFollowing(ctx context.Context, userToUnfollow string, userUnfollowing string) error
 	AlreadyFollowing(ctx context.Context, following *domain.ProfileFollowing) bool
 	ExistsProfileIds(ctx context.Context, following *domain.ProfileFollowing) error
+
 }
 
 type followingRepo struct {

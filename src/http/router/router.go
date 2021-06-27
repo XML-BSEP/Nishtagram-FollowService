@@ -42,6 +42,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.POST("/getAllUsersToWhomUserIsCloseFriend", handler.GetAllUsersToWhomUserIsCloseFriend)
 	router.POST("/isUserFollowingUser", handler.IsUserFollowingUser)
 	router.POST("/approveAllRequests", handler.ApproveAllRequests)
+	router.POST("/banUser", handler.BanUser)
 
 	return router
 }
