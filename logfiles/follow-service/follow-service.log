@@ -5666,3 +5666,9 @@
 {"data":{},"file":"following_usecase.go:71","func":"FollowService/usecase.followingUseCase.GetAllUsersFollowings","level":"info","msg":"getting all users following","time":"2021-06-23 00:42:56"}
 {"data":{},"file":"follow_request_handler.go:43","func":"FollowService/http/handler.followRequestHandler.GetAllUsersFollowRequests","level":"info","msg":"Handling GETTING ALL USERS FOR FOLLOW REQUEST","time":"2021-06-23 00:42:59"}
 {"data":{},"file":"follow_request_usecase.go:96","func":"FollowService/usecase.followRequestUseCase.GetAllUsersFollowRequests","level":"info","msg":"get all users follow request for user 424935b1-766c-4f99-b306-9263731518bc\n","time":"2021-06-23 00:42:59"}
+{"data":{},"file":"follower_handler.go:30","func":"FollowService/http/handler.followerHandler.BanUser","level":"info","msg":"Handling BANNING USER","time":"2021-06-27 01:47:16"}
+{"data":{},"file":"follower_usecase.go:183","func":"FollowService/usecase.followerUseCase.GetAllUsersFollowers","level":"info","msg":"getting all users followers","time":"2021-06-27 01:47:16"}
+{"data":{},"file":"follower_handler.go:30","func":"FollowService/http/handler.followerHandler.BanUser","level":"info","msg":"Handling BANNING USER","time":"2021-06-27 01:49:09"}
+{"data":{},"file":"follower_usecase.go:183","func":"FollowService/usecase.followerUseCase.GetAllUsersFollowers","level":"info","msg":"getting all users followers","time":"2021-06-27 01:49:27"}
+{"data":{},"file":"follower_handler.go:30","func":"FollowService/http/handler.followerHandler.BanUser","level":"info","msg":"Handling BANNING USER","time":"2021-06-27 01:50:06"}
+{"data":{},"file":"follower_usecase.go:183","func":"FollowService/usecase.followerUseCase.GetAllUsersFollowers","level":"info","msg":"getting all users followers","time":"2021-06-27 01:50:14"}

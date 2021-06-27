@@ -19,12 +19,37 @@ type FollowingHandler interface {
 	Follow(ctx *gin.Context)
 	IsAllowedToFollow(ctx *gin.Context)
 	GetAllFollowingFront(ctx *gin.Context)
+	BanUser(ctx *gin.Context)
+
 }
 
 type followingHandler struct {
 	FollowingUseCase usecase.FollowingUseCase
 	FollowingRequestUsecase usecase.FollowRequestUseCase
 	logger *logger.Logger
+}
+
+func (f followingHandler) BanUser(ctx *gin.Context){
+	f.logger.Logger.Println("Handling BANNING USER")
+
+	decoder := json.NewDecoder(ctx.Request.Body)
+	var t dto.ProfileDTO
+	decode_err := decoder.Decode(&t)
+
+	if decode_err!=nil{
+		f.logger.Logger.Errorf("decoder error, error: %v\n", decode_err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": decode_err.Error()})
+		return
+	}
+
+	err := f.FollowingUseCase.BanUser(ctx,t.ID)
+	if err!= nil{
+		f.logger.Logger.Errorf("unfollow error, error: %v\n", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{})
+	return
 }
 
 func (f *followingHandler) GetAllFollowingFront(ctx *gin.Context) {
@@ -159,6 +184,8 @@ func (f followingHandler) GetAllUsersFollowings(ctx *gin.Context) {
 //	ctx.JSON(http.StatusOK, gin.H{})
 //	return
 //}
+
+
 
 func (f followingHandler) Unfollow(ctx *gin.Context) {
 	f.logger.Logger.Println("Handling UNFOLLOW")

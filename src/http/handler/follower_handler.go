@@ -24,6 +24,7 @@ type followerHandler struct {
 	logger *logger.Logger
 }
 
+
 func (f followerHandler) IsUserFollowingUser(ctx *gin.Context) {
 	f.logger.Logger.Println("Handling IS USER FOLLOWING USER")
 	decoder := json.NewDecoder(ctx.Request.Body)
