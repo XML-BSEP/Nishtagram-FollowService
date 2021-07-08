@@ -20,13 +20,27 @@ type FollowingHandler interface {
 	IsAllowedToFollow(ctx *gin.Context)
 	GetAllFollowingFront(ctx *gin.Context)
 	BanUser(ctx *gin.Context)
-
+	Recommend(ctx *gin.Context)
 }
 
 type followingHandler struct {
 	FollowingUseCase usecase.FollowingUseCase
 	FollowingRequestUsecase usecase.FollowRequestUseCase
 	logger *logger.Logger
+	Neo4jUsecase usecase.Neo4jUsecase
+}
+
+func (f followingHandler) Recommend(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+
+	recommendations, err := f.Neo4jUsecase.Recommend(userId)
+
+	if err != nil {
+		ctx.JSON(400, gin.H{"message" : "Error"})
+		return
+	}
+
+	ctx.JSON(200, recommendations)
 }
 
 func (f followingHandler) BanUser(ctx *gin.Context){
@@ -109,12 +123,16 @@ func (f *followingHandler) Follow(ctx *gin.Context) {
 
 	decoder := json.NewDecoder(ctx.Request.Body)
 
+
+
 	var followDto dto.FollowDTO
 	if err := decoder.Decode(&followDto); err != nil {
 		f.logger.Logger.Errorf("decoder error, error: %v\n", err)
 		ctx.JSON(400, gin.H{"message" : "Decoding error"})
 		return
 	}
+
+
 
 	profileFollowing := mapper.FollowDtoToProfileFollowing(followDto)
 	if f.FollowingUseCase.AlreadyFollowing(ctx, profileFollowing) {
@@ -131,6 +149,11 @@ func (f *followingHandler) Follow(ctx *gin.Context) {
 	_, err := f.FollowingUseCase.CreateFollowing(ctx, profileFollowing)
 	if err != nil {
 		f.logger.Logger.Errorf("failed to create following, error: %v\n", err)
+		ctx.JSON(400, gin.H{"message" : "Error"})
+		return
+	}
+
+	if err := f.Neo4jUsecase.Follow(followDto.User.ID, followDto.Follower.ID); err != nil {
 		ctx.JSON(400, gin.H{"message" : "Error"})
 		return
 	}
@@ -207,9 +230,14 @@ func (f followingHandler) Unfollow(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if err := f.Neo4jUsecase.Unfollow(t.UserUnfollowing, t.UserToUnfollow); err != nil {
+		ctx.JSON(400, gin.H{"message" : "Error unfollowing"})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{})
 	return
 }
-func NewFollowingHandler(u usecase.FollowingUseCase, f usecase.FollowRequestUseCase, logger *logger.Logger) FollowingHandler {
-	return &followingHandler{u, f, logger}
+func NewFollowingHandler(u usecase.FollowingUseCase, f usecase.FollowRequestUseCase, logger *logger.Logger, neo4jUsecase usecase.Neo4jUsecase) FollowingHandler {
+	return &followingHandler{u, f, logger, neo4jUsecase}
 }

@@ -1,0 +1,9 @@
+{
+  "docker" : true,
+  "neo4j_uri_docker" : "",
+  "neo4j_uri_localhost" : "neo4j://localhost:7687",
+  "server" : {},
+  "username" : "neo4j",
+  "password" : "root"
+
+}

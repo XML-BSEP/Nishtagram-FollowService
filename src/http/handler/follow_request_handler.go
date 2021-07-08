@@ -19,6 +19,7 @@ type FollowRequestHandler interface {
 type followRequestHandler struct {
 	FollowRequestUseCase usecase.FollowRequestUseCase
 	logger *logger.Logger
+	neo4jUsecase usecase.Neo4jUsecase
 }
 
 func (f followRequestHandler) ApproveAllRequests(ctx *gin.Context) {
@@ -59,6 +60,12 @@ func (f followRequestHandler) CancelFollowRequest(ctx *gin.Context){
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if err := f.neo4jUsecase.Unfollow(t.UserRequested, t.FollowedAccount); err != nil {
+		ctx.JSON(400, gin.H{"message" : "Error"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"message":"Succefully removed follow request!"})
 	return
 }
@@ -112,6 +119,6 @@ func (f followRequestHandler) ApproveRequest(ctx *gin.Context){
 }
 
 
-func NewFollowRequestHandler(u usecase.FollowRequestUseCase, logger *logger.Logger) FollowRequestHandler {
-	return &followRequestHandler{u, logger}
+func NewFollowRequestHandler(u usecase.FollowRequestUseCase, logger *logger.Logger, neo4jUsecase usecase.Neo4jUsecase) FollowRequestHandler {
+	return &followRequestHandler{u, logger, neo4jUsecase}
 } 	
