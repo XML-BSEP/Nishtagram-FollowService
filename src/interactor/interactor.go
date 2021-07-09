@@ -19,7 +19,7 @@ func (i *interactor) NewNeo4jRepository() repository.Neo4jRepository {
 	return repository.NewNeo4jRepository(i.neo4JDriver)
 }
 
-func (i *interactor) NewNeo4jUsecase() repository.Neo4jRepository {
+func (i *interactor) NewNeo4jUsecase() usecase.Neo4jUsecase {
 	return usecase.NewNe04jUsecase(i.NewNeo4jRepository())
 }
 
@@ -94,7 +94,7 @@ type Interactor interface {
 	NewFollowingUseCase() usecase.FollowingUseCase
 	NewFollowerUseCase() usecase.FollowerUseCase
 	NewRequestUseCase() usecase.FollowRequestUseCase
-	NewNeo4jUsecase() repository.Neo4jRepository
+	NewNeo4jUsecase() usecase.Neo4jUsecase
 
 	NewFollowingHandler() handler.FollowingHandler
 	NewFollowerHandler() handler.FollowerHandler

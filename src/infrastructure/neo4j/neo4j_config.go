@@ -3,6 +3,7 @@ package neo4j
 import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/viper"
+	"os"
 )
 
 func init_viper() {
@@ -15,8 +16,13 @@ func init_viper() {
 
 func NewNeo4jDriver() (neo4j.Driver, error) {
 	init_viper()
+	var host string
+	if os.Getenv("DOCKER_ENV") == "" {
+		host = viper.GetString("neo4j_uri_localhost")
+	} else {
+		host = viper.GetString("neo4j_uri_docker")
 
-	host := viper.GetString("neo4j_uri_localhost")
+	}
 	username := viper.GetString("username")
 	password := viper.GetString("password")
 

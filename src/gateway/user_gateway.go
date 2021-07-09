@@ -64,6 +64,59 @@ func IsProfilePrivate(ctx context.Context, userId string) (bool, error) {
 }
 
 
+func GetSearchResults(ctx context.Context, userIds dto.UserIdsDto) ([]dto.SearchUserDTO, error) {
+	client := resty2.New()
+	domain := os.Getenv("USER_DOMAIN")
+	if domain == "" {
+		domain = "127.0.0.1"
+	}
+
+	if os.Getenv("DOCKER_ENV") == "" {
+		resp, err := client.R().
+			SetBody(userIds).
+			SetContext(ctx).
+			EnableTrace().
+			Post("https://" + domain + ":8082/getSearchInfo")
+
+		if err != nil {
+			return nil, fmt.Errorf("Err")
+		}
+
+		if resp.StatusCode() != 200 {
+			return nil, fmt.Errorf("Err")
+		}
+
+		var searchUser []dto.SearchUserDTO
+		if err := json.Unmarshal(resp.Body(), &searchUser); err != nil {
+			return nil, fmt.Errorf("Err")
+		}
+
+		return searchUser, err
+	} else {
+		resp, err := client.R().
+			SetBody(userIds).
+			SetContext(ctx).
+			EnableTrace().
+			Post("http://" + domain + ":8082/getSearchInfo")
+		if err != nil {
+			return nil, fmt.Errorf("Err")
+		}
+
+		if resp.StatusCode() != 200 {
+			return nil, fmt.Errorf("Err")
+		}
+
+		var searchUser []dto.SearchUserDTO
+		if err := json.Unmarshal(resp.Body(), &searchUser); err != nil {
+			return nil, fmt.Errorf("Err")
+		}
+
+		return searchUser, err
+	}
+
+}
+
+
 func GetUser(ctx context.Context, userId string) (dto.ProfileUsernameImageDTO, error) {
 	client := resty2.New()
 	domain := os.Getenv("USER_DOMAIN")
