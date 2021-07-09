@@ -6,11 +6,21 @@ import (
 	"FollowService/repository"
 	"FollowService/usecase"
 	logger "github.com/jelena-vlajkov/logger/logger"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 type interactor struct {
 	db *mongo.Client
 	logger *logger.Logger
+	neo4JDriver neo4j.Driver
+}
+
+func (i *interactor) NewNeo4jRepository() repository.Neo4jRepository {
+	return repository.NewNeo4jRepository(i.neo4JDriver)
+}
+
+func (i *interactor) NewNeo4jUsecase() repository.Neo4jRepository {
+	return usecase.NewNe04jUsecase(i.NewNeo4jRepository())
 }
 
 func (i *interactor) NewFollowServiceImpl() *implementation.FollowServiceImpl {
@@ -26,7 +36,7 @@ func (i *interactor) NewRequestUseCase() usecase.FollowRequestUseCase {
 }
 
 func (i *interactor) NewRequestHandler() handler.FollowRequestHandler {
-	return handler.NewFollowRequestHandler(i.NewRequestUseCase(), i.logger)
+	return handler.NewFollowRequestHandler(i.NewRequestUseCase(), i.logger, i.NewNeo4jUsecase())
 }
 
 
@@ -42,7 +52,7 @@ func (i *interactor) NewFollowingUseCase() usecase.FollowingUseCase {
 }
 
 func (i *interactor) NewFollowingHandler() handler.FollowingHandler {
-	return handler.NewFollowingHandler(i.NewFollowingUseCase(), i.NewRequestUseCase(), i.logger)
+	return handler.NewFollowingHandler(i.NewFollowingUseCase(), i.NewRequestUseCase(), i.logger, i.NewNeo4jUsecase())
 }
 
 
@@ -79,16 +89,20 @@ type Interactor interface {
 	NewFollowingRepository() repository.FollowingRepo
 	NewFollowerRepository() repository.FollowerRepo
 	NewRequestRepository() repository.FollowRequestRepo
+	NewNeo4jRepository() repository.Neo4jRepository
 
 	NewFollowingUseCase() usecase.FollowingUseCase
 	NewFollowerUseCase() usecase.FollowerUseCase
 	NewRequestUseCase() usecase.FollowRequestUseCase
+	NewNeo4jUsecase() repository.Neo4jRepository
 
 	NewFollowingHandler() handler.FollowingHandler
 	NewFollowerHandler() handler.FollowerHandler
 	NewRequestHandler() handler.FollowRequestHandler
 
 	NewAppHandler() AppHandler
+
+
 
 	NewFollowServiceImpl() *implementation.FollowServiceImpl
 }
@@ -107,6 +121,6 @@ type AppHandler interface {
 
 }
 
-func NewInteractor(db *mongo.Client, logger *logger.Logger) Interactor {
-	return &interactor{db: db, logger: logger}
+func NewInteractor(db *mongo.Client, logger *logger.Logger, neo4jDriver neo4j.Driver) Interactor {
+	return &interactor{db: db, logger: logger, neo4JDriver: neo4jDriver}
 }

@@ -4,6 +4,7 @@ import (
 	"FollowService/http/router"
 	"FollowService/infrastructure/grpc/follow_service"
 	"FollowService/infrastructure/mongo"
+	"FollowService/infrastructure/neo4j"
 	"FollowService/infrastructure/seeder"
 	"FollowService/interactor"
 	"context"
@@ -32,6 +33,16 @@ func getNetListener(port uint) net.Listener {
 }
 
 func main() {
+
+	driver, err := neo4j.NewNeo4jDriver()
+	if err := seeder.Seed(driver); err != nil {
+		log.Fatal(err)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	logger := logger.InitializeLogger("follow-service", context.Background())
 
 	mongoCli, ctx := mongo.NewMongoClient()
@@ -39,7 +50,7 @@ func main() {
 
 	seeder.SeedData(db, mongoCli, ctx)
 
-	i := interactor.NewInteractor(mongoCli, logger)
+	i := interactor.NewInteractor(mongoCli, logger, driver)
 	appHandler := i.NewAppHandler()
 
 	g := router.NewRouter(appHandler)
